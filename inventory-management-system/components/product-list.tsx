@@ -1,0 +1,225 @@
+"use client"
+
+import { useState } from "react"
+import { Edit, Trash2, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { CategoryIconSelector } from "@/components/category-icon-selector"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+
+interface Product {
+  id: number
+  name: string
+  description: string
+  category: string
+  price: number
+  quantity: number
+}
+
+interface ProductListProps {
+  products: Product[]
+  onEdit: (product: Product) => void
+  onDelete: (productId: number) => void
+}
+
+type SortField = "name" | "category" | "price" | "quantity"
+type SortDirection = "asc" | "desc"
+
+export function ProductList({ products, onEdit, onDelete }: ProductListProps) {
+  const [sortField, setSortField] = useState<SortField>("name")
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
+
+  const getStockStatus = (quantity: number) => {
+    if (quantity === 0) return { label: "Sin Stock", color: "bg-red-500" }
+    if (quantity < 10) return { label: "Stock Bajo", color: "bg-orange-500" }
+    return { label: "En Stock", color: "bg-green-500" }
+  }
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+    } else {
+      setSortField(field)
+      setSortDirection("asc")
+    }
+  }
+
+  const sortedProducts = [...products].sort((a, b) => {
+    let aValue = a[sortField]
+    let bValue = b[sortField]
+
+    if (typeof aValue === "string") {
+      aValue = aValue.toLowerCase()
+      bValue = bValue.toLowerCase()
+    }
+
+    if (sortDirection === "asc") {
+      return aValue < bValue ? -1 : aValue > bValue ? 1 : 0
+    } else {
+      return aValue > bValue ? -1 : aValue < bValue ? 1 : 0
+    }
+  })
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="h-4 w-4 text-gray-400" />
+    }
+    return sortDirection === "asc" ? (
+      <ChevronUp className="h-4 w-4 text-purple-600" />
+    ) : (
+      <ChevronDown className="h-4 w-4 text-purple-600" />
+    )
+  }
+
+  if (products.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="animate-slide-up bg-white rounded-lg shadow-lg border-0 overflow-hidden">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100">
+              <TableHead className="w-12"></TableHead>
+              <TableHead>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort("name")}
+                  className="h-auto p-0 font-semibold text-gray-700 hover:text-purple-600 flex items-center gap-2"
+                >
+                  Producto
+                  <SortIcon field="name" />
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort("category")}
+                  className="h-auto p-0 font-semibold text-gray-700 hover:text-purple-600 flex items-center gap-2"
+                >
+                  Categoría
+                  <SortIcon field="category" />
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort("price")}
+                  className="h-auto p-0 font-semibold text-gray-700 hover:text-purple-600 flex items-center gap-2"
+                >
+                  Precio
+                  <SortIcon field="price" />
+                </Button>
+              </TableHead>
+              <TableHead>
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort("quantity")}
+                  className="h-auto p-0 font-semibold text-gray-700 hover:text-purple-600 flex items-center gap-2"
+                >
+                  Stock
+                  <SortIcon field="quantity" />
+                </Button>
+              </TableHead>
+              <TableHead className="text-center">Estado</TableHead>
+              <TableHead className="text-center">Valor Total</TableHead>
+              <TableHead className="text-center">Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedProducts.map((product, index) => {
+              const stockStatus = getStockStatus(product.quantity)
+              return (
+                <TableRow
+                  key={product.id}
+                  className="hover:bg-gradient-to-r hover:from-purple-25 hover:to-blue-25 transition-all duration-200 animate-slide-up border-b border-gray-100"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <TableCell>
+                    <CategoryIconSelector category={product.category} size="sm" />
+                  </TableCell>
+                  <TableCell>
+                    <div>
+                      <div className="font-semibold text-gray-900 mb-1">{product.name}</div>
+                      <div className="text-sm text-gray-500 line-clamp-1">{product.description}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="secondary" className="bg-gray-100 text-gray-700">
+                      {product.category}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-lg font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                      ${product.price.toLocaleString()}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900">{product.quantity}</span>
+                      <span className="text-sm text-gray-500">unidades</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge className={`${stockStatus.color} text-white border-0`}>{stockStatus.label}</Badge>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className="font-semibold text-green-600">
+                      ${(product.price * product.quantity).toLocaleString()}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onEdit(product)}
+                        className="hover:bg-blue-50 hover:border-blue-300 transition-colors bg-transparent group"
+                      >
+                        <Edit className="h-4 w-4 group-hover:text-blue-600 transition-colors" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onDelete(product.id)}
+                        className="hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors bg-transparent group"
+                      >
+                        <Trash2 className="h-4 w-4 group-hover:text-red-600 transition-colors" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Summary Footer */}
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-t">
+        <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
+          <div className="flex items-center gap-6">
+            <span className="text-gray-600">
+              <span className="font-semibold text-gray-900">{products.length}</span> productos mostrados
+            </span>
+            <span className="text-gray-600">
+              Valor total:{" "}
+              <span className="font-semibold text-green-600">
+                ${products.reduce((sum, p) => sum + p.price * p.quantity, 0).toLocaleString()}
+              </span>
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-gray-600">
+              Stock total:{" "}
+              <span className="font-semibold text-blue-600">
+                {products.reduce((sum, p) => sum + p.quantity, 0)} unidades
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

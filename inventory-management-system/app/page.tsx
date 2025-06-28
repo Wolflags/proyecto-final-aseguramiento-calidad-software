@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Package, Plus, Search, AlertTriangle, DollarSign, BarChart3, LayoutGrid, List } from "lucide-react"
+import {
+  Package, Plus, Search, AlertTriangle, DollarSign, BarChart3, LayoutGrid, List
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ProductModal } from "@/components/product-modal"
@@ -10,13 +12,15 @@ import { StatsCard } from "@/components/stats-card"
 import { Navbar } from "@/components/navbar"
 import { EmptyState } from "@/components/empty-state"
 import { ProductList } from "@/components/product-list"
+import { Slider } from "@/components/ui/slider"
 import {
-  listarProductos,
-  crearProducto,
-  actualizarProducto,
-  eliminarProducto,
-  Producto,
+  listarProductos, crearProducto, actualizarProducto, eliminarProducto, Producto
 } from "@/services/productoService"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+const categories = [
+  "Todos", "Electrónicos", "Audio", "Móviles", "Computadoras", "Accesorios", "Gaming", "Hogar", "Otros"
+]
 
 export default function InventoryDashboard() {
   const [products, setProducts] = useState<Producto[]>([])
@@ -24,11 +28,18 @@ export default function InventoryDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
   const [viewMode, setViewMode] = useState("list")
+  const [selectedCategory, setSelectedCategory] = useState("Todos")
+  const [maxPrice, setMaxPrice] = useState(0)
+  const [priceRange, setPriceRange] = useState<number[]>([0])
 
-  // Cargar productos desde el backend
   const fetchProducts = () => {
     listarProductos()
-        .then((res) => setProducts(res.data))
+        .then((res) => {
+          setProducts(res.data)
+          const highestPrice = Math.max(...res.data.map((p: Producto) => p.precio), 0)
+          setMaxPrice(highestPrice)
+          setPriceRange([highestPrice])
+        })
         .catch((error) => console.error("Error al cargar productos", error))
   }
 
@@ -36,17 +47,17 @@ export default function InventoryDashboard() {
     fetchProducts()
   }, [])
 
-  // Filtro de productos
   const filteredProducts = products.filter(
       (product) =>
-          product.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.categoria.toLowerCase().includes(searchTerm.toLowerCase())
+          product.nombre.toLowerCase().includes(searchTerm.toLowerCase()) &&
+          (selectedCategory === "Todos" || product.categoria === selectedCategory) &&
+          product.precio <= priceRange[0]
   )
 
   const totalProducts = products.length
   const totalValue = products.reduce((sum, p) => sum + p.precio * p.cantidadInicial, 0)
   const lowStockProducts = products.filter((p) => p.cantidadInicial < 10).length
-  const categories = [...new Set(products.map((p) => p.categoria))].length
+  const categoriesCount = [...new Set(products.map((p) => p.categoria))].length
 
   const handleAddProduct = (productData: Producto) => {
     crearProducto(productData)
@@ -97,29 +108,49 @@ export default function InventoryDashboard() {
             <StatsCard title="Total Productos" value={totalProducts} icon={Package} color="from-blue-500 to-cyan-500" delay="0" />
             <StatsCard title="Valor Total" value={`$${totalValue.toLocaleString()}`} icon={DollarSign} color="from-green-500 to-emerald-500" delay="100" />
             <StatsCard title="Stock Bajo" value={lowStockProducts} icon={AlertTriangle} color="from-orange-500 to-red-500" delay="200" />
-            <StatsCard title="Categorías" value={categories} icon={BarChart3} color="from-purple-500 to-pink-500" delay="300" />
+            <StatsCard title="Categorías" value={categoriesCount} icon={BarChart3} color="from-purple-500 to-pink-500" delay="300" />
           </div>
 
-          {/* Buscador y Acciones */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-8 animate-slide-up" style={{ animationDelay: "400ms" }}>
+          {/* Filtros */}
+          <div className="flex flex-col md:flex-row gap-4 mb-8 animate-slide-up" style={{ animationDelay: "400ms" }}>
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
-                  placeholder="Buscar productos por nombre o categoría..."
+                  placeholder="Buscar productos por nombre..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 h-12 border-2 border-gray-200 focus:border-purple-500 transition-colors"
               />
             </div>
 
-            <div className="flex bg-gray-100 rounded-lg p-1">
-              <Button variant={viewMode === "list"} size="sm" onClick={() => setViewMode("list")} className={`px-4 ${viewMode === "list" ? "bg-white shadow-sm" : "hover:bg-gray-200"}`}>
-                <List className="h-4 w-4 mr-2" /> Lista
-              </Button>
+            <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value)}>
+              <SelectTrigger className="w-52 border-2 border-gray-200 focus:border-purple-500">
+                <SelectValue placeholder="Categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <div className="w-56 flex items-center">
+              <span className="mr-2 text-sm text-gray-600">Precio máx:</span>
+              <Slider
+                  defaultValue={[maxPrice]}
+                  max={maxPrice}
+                  step={10}
+                  value={priceRange}
+                  onValueChange={setPriceRange}
+                  className="w-full"
+              />
+              <span className="ml-2 text-sm font-semibold text-gray-800">${priceRange[0]}</span>
             </div>
 
             <Button onClick={() => openModal()} className="h-12 px-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
-              <Plus className="mr-2 h-4 w-4" /> Agregar Producto
+              <Plus className="mr-2 h-4 w-4" /> Agregar
             </Button>
           </div>
 
@@ -140,13 +171,11 @@ export default function InventoryDashboard() {
               </div>
           )}
 
-          {/* Estado vacío */}
           {filteredProducts.length === 0 && (
               <EmptyState type={searchTerm ? "no-search-results" : "no-products"} onAddProduct={searchTerm ? undefined : () => openModal()} />
           )}
         </main>
 
-        {/* Modal */}
         <ProductModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}

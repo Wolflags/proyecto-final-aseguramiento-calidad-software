@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.proyectofinal.entities.Producto;
 import org.example.proyectofinal.services.ProductoService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,15 +11,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/productos")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3001") // Allow requests from the frontend
 public class ProductoController {
 
-    private final ProductoService productoService ;
+    private final ProductoService productoService;
 
     @PostMapping
     public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
         return ResponseEntity.ok(productoService.crearProducto(producto));
     }
-
 
     @GetMapping("/listar")
     public ResponseEntity<List<Producto>> listarProductos() {
@@ -52,6 +50,4 @@ public class ProductoController {
     public ResponseEntity<List<Producto>> buscarProductosPorCategoria(@RequestParam String categoria) {
         return ResponseEntity.ok(productoService.buscarProductosPorCategoria(categoria));
     }
-
-
 }

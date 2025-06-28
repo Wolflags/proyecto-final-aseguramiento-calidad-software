@@ -43,7 +43,9 @@ export function ProductPreview({ name, category, price, quantity }: ProductPrevi
             <Package className="h-3 w-3 text-gray-500" />
             <span className="text-sm text-gray-600">{quantity} unidades</span>
           </div>
-          <span className="text-lg font-bold text-purple-600">${price.toLocaleString() || "0"}</span>
+          <span className="text-lg font-bold text-purple-600">
+            ${price?.toLocaleString() || "0"}
+          </span>
         </div>
       </div>
     </div>

@@ -17,6 +17,8 @@ import {
   listarProductos, crearProducto, actualizarProducto, eliminarProducto, Producto
 } from "@/services/productoService"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ProtectedRoute } from "@/components/protected-route"
+import { useAuth } from "@/contexts/AuthContext"
 
 const categories = [
   "Todos", "Electrónicos", "Audio", "Móviles", "Computadoras", "Accesorios", "Gaming", "Hogar", "Otros"
@@ -51,6 +53,13 @@ export default function InventoryDashboard() {
   const [selectedCategory, setSelectedCategory] = useState("Todos")
   const [maxPrice, setMaxPrice] = useState(0)
   const [priceRange, setPriceRange] = useState<number[]>([0])
+  
+  const { hasRole, hasAnyRole, isAuthenticated } = useAuth()
+  
+  // Verificar permisos para diferentes acciones (solo si está autenticado)
+  const canCreateProducts = isAuthenticated && hasAnyRole(['ADMIN', 'EMPLEADO'])
+  const canEditProducts = isAuthenticated && hasAnyRole(['ADMIN', 'EMPLEADO'])
+  const canDeleteProducts = isAuthenticated && hasRole('ADMIN')
 
   const fetchProducts = () => {
     listarProductos()
@@ -105,17 +114,46 @@ export default function InventoryDashboard() {
   }
 
   return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50">
-        <Navbar />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50">
+      <Navbar />
 
-        <main className="container mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="mb-8 animate-fade-in">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
-              Sistema de Gestión de Inventarios
-            </h1>
-            <p className="text-gray-600 text-lg">Administra tu inventario de manera eficiente y moderna</p>
+      <main className="container mx-auto px-4 py-8">
+        {/* Banner informativo para usuarios no autenticados */}
+        {!isAuthenticated && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg animate-fade-in">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Package className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-blue-800">Modo de solo lectura</h3>
+                  <p className="text-xs text-blue-600">Estás viendo el inventario como invitado. Para gestionar productos, inicia sesión.</p>
+                </div>
+              </div>
+              <Button 
+                onClick={() => window.location.href = '/login'} 
+                size="sm" 
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                Iniciar Sesión
+              </Button>
+            </div>
           </div>
+        )}
+
+        {/* Header */}
+        <div className="mb-8 animate-fade-in">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
+            Sistema de Gestión de Inventarios
+          </h1>
+          <p className="text-gray-600 text-lg">
+            {isAuthenticated 
+              ? "Administra tu inventario de manera eficiente y moderna"
+              : "Explora nuestro catálogo de productos disponibles"
+            }
+          </p>
+        </div>
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -163,22 +201,28 @@ export default function InventoryDashboard() {
               <span className="ml-2 text-sm font-semibold text-gray-800">${priceRange[0]}</span>
             </div>
 
-            <Button onClick={() => openModal()} className="h-12 px-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
-              <Plus className="mr-2 h-4 w-4" /> Agregar
-            </Button>
+            {canCreateProducts && (
+              <Button onClick={() => openModal()} className="h-12 px-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
+                <Plus className="mr-2 h-4 w-4" /> Agregar
+              </Button>
+            )}
           </div>
 
           {/* Productos */}
           {viewMode === "list" ? (
-              <ProductList products={filteredProducts.map(mapProductoToRawProduct)} onEdit={handleEditModal} onDelete={handleDeleteProduct} />
+              <ProductList 
+                products={filteredProducts.map(mapProductoToRawProduct)} 
+                onEdit={canEditProducts ? handleEditModal : undefined} 
+                onDelete={canDeleteProducts ? handleDeleteProduct : undefined} 
+              />
           ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredProducts.map((product, index) => (
                     <ProductCard
                         key={product.id}
                         product={mapProductoToProduct(product)}
-                        onEdit={() => openModal(product)}
-                        onDelete={() => handleDeleteProduct(product.id!)}
+                        onEdit={canEditProducts ? () => openModal(product) : undefined}
+                        onDelete={canDeleteProducts ? () => handleDeleteProduct(product.id!) : undefined}
                         delay={index * 100}
                     />
                 ))}
@@ -186,7 +230,11 @@ export default function InventoryDashboard() {
           )}
 
           {filteredProducts.length === 0 && (
-              <EmptyState type={searchTerm ? "no-search-results" : "no-products"} onAddProduct={searchTerm ? undefined : () => openModal()} />
+              <EmptyState 
+                type={searchTerm ? "no-search-results" : "no-products"} 
+                onAddProduct={searchTerm || !canCreateProducts ? undefined : () => openModal()} 
+                isAuthenticated={isAuthenticated}
+              />
           )}
         </main>
 

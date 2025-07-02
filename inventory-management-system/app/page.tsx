@@ -22,6 +22,26 @@ const categories = [
   "Todos", "Electrónicos", "Audio", "Móviles", "Computadoras", "Accesorios", "Gaming", "Hogar", "Otros"
 ]
 
+// Función para mapear Producto a Product (para el modal)
+const mapProductoToProduct = (producto: Producto) => ({
+  id: producto.id || 0,
+  name: producto.nombre,
+  description: producto.descripcion,
+  category: producto.categoria,
+  price: producto.precio,
+  quantity: producto.cantidadInicial,
+})
+
+// Función para mapear Producto a RawProduct (para ProductList)
+const mapProductoToRawProduct = (producto: Producto) => ({
+  id: producto.id || 0,
+  nombre: producto.nombre,
+  descripcion: producto.descripcion,
+  categoria: producto.categoria,
+  precio: producto.precio,
+  cantidadInicial: producto.cantidadInicial,
+})
+
 export default function InventoryDashboard() {
   const [products, setProducts] = useState<Producto[]>([])
   const [searchTerm, setSearchTerm] = useState("")
@@ -59,26 +79,6 @@ export default function InventoryDashboard() {
   const lowStockProducts = products.filter((p) => p.cantidadInicial < 10).length
   const categoriesCount = [...new Set(products.map((p) => p.categoria))].length
 
-  const handleAddProduct = (productData: Producto) => {
-    crearProducto(productData)
-        .then(() => {
-          fetchProducts()
-          setIsModalOpen(false)
-        })
-        .catch((error) => console.error("Error al agregar producto", error))
-  }
-
-  const handleEditProduct = (productData: Producto) => {
-    if (!selectedProduct?.id) return
-
-    actualizarProducto(selectedProduct.id, productData)
-        .then(() => {
-          fetchProducts()
-          setIsModalOpen(false)
-        })
-        .catch((error) => console.error("Error al actualizar producto", error))
-  }
-
   const handleDeleteProduct = (id: number) => {
     eliminarProducto(id)
         .then(() => fetchProducts())
@@ -88,6 +88,20 @@ export default function InventoryDashboard() {
   const openModal = (product: Producto | null = null) => {
     setSelectedProduct(product)
     setIsModalOpen(true)
+  }
+
+  // Función para crear una función onEdit que maneje el mapeo correcto
+  const handleEditModal = (product: any) => {
+    // Si viene del ProductList, el producto ya está mapeado
+    // Si viene del ProductCard, necesitamos mapear de Producto a Product
+    if (product.nombre) {
+      // Es un Producto del backend
+      openModal(product)
+    } else {
+      // Ya está mapeado, necesitamos encontrar el Producto original
+      const originalProduct = products.find(p => p.id === product.id)
+      openModal(originalProduct || null)
+    }
   }
 
   return (
@@ -156,13 +170,13 @@ export default function InventoryDashboard() {
 
           {/* Productos */}
           {viewMode === "list" ? (
-              <ProductList products={filteredProducts} onEdit={openModal} onDelete={handleDeleteProduct} />
+              <ProductList products={filteredProducts.map(mapProductoToRawProduct)} onEdit={handleEditModal} onDelete={handleDeleteProduct} />
           ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {filteredProducts.map((product, index) => (
                     <ProductCard
                         key={product.id}
-                        product={product}
+                        product={mapProductoToProduct(product)}
                         onEdit={() => openModal(product)}
                         onDelete={() => handleDeleteProduct(product.id!)}
                         delay={index * 100}
@@ -179,8 +193,8 @@ export default function InventoryDashboard() {
         <ProductModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            product={selectedProduct}
-            onSave={selectedProduct ? handleEditProduct : handleAddProduct}
+            product={selectedProduct ? mapProductoToProduct(selectedProduct) : null}
+            onRefresh={fetchProducts}
         />
       </div>
   )

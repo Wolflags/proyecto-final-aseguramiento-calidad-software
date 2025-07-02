@@ -12,6 +12,7 @@ package org.example.proyectofinal.controller;
     @RestController
     @RequestMapping("/api/productos")
     @RequiredArgsConstructor
+    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001"})
     public class ProductoController {
 
         private final ProductoService productoService;

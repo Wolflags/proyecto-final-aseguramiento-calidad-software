@@ -1,24 +1,17 @@
-import axios from "axios"
+import { authApi } from './authService'
+import axios from 'axios'
 
-// URL base del backend
-const API_URL = "http://localhost:8080/api/productos"
+// URL base para productos
+const PRODUCTOS_URL = "/api/productos"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
 
-// Configurar axios con headers por defecto
-axios.defaults.headers.common['Content-Type'] = 'application/json';
-axios.defaults.withCredentials = true;
-
-// Interceptor para manejar errores globalmente
-axios.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 403) {
-      console.error('Error de autorización: No tienes permisos para realizar esta acción');
-    } else if (error.code === 'ERR_NETWORK') {
-      console.error('Error de red: Verifica que el servidor esté ejecutándose en el puerto 8080');
-    }
-    return Promise.reject(error);
-  }
-);
+// Cliente axios público para operaciones que no requieren autenticación
+const publicApi = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
 
 // Interfaz de producto para TypeScript
 export interface Producto {
@@ -32,26 +25,18 @@ export interface Producto {
 
 // Servicios para consumir la API
 
-// Listar productos
-export const listarProductos = () => axios.get(`${API_URL}/listar`)
+// Listar productos (público - no requiere autenticación)
+export const listarProductos = () => publicApi.get(`${PRODUCTOS_URL}/listar`)
 
-// Crear producto
+// Crear producto (requiere autenticación)
 export const crearProducto = (producto: Producto) => {
-    return axios.post(`${API_URL}`, producto, {
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
+    return authApi.post(PRODUCTOS_URL, producto)
 }
 
-// Eliminar producto por ID
-export const eliminarProducto = (id: number) => axios.delete(`${API_URL}/${id}`)
+// Eliminar producto por ID (requiere autenticación)
+export const eliminarProducto = (id: number) => authApi.delete(`${PRODUCTOS_URL}/${id}`)
 
-// Actualizar producto por ID
+// Actualizar producto por ID (requiere autenticación)
 export const actualizarProducto = (id: number, producto: Producto) => {
-    return axios.put(`${API_URL}/${id}`, producto, {
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    });
+    return authApi.put(`${PRODUCTOS_URL}/${id}`, producto)
 }

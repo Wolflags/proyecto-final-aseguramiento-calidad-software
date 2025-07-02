@@ -28,8 +28,8 @@ interface Product {
 
 interface ProductCardProps {
   product: Product
-  onEdit: () => void
-  onDelete: () => void
+  onEdit?: () => void
+  onDelete?: () => void
   delay: number
 }
 
@@ -127,24 +127,33 @@ export function ProductCard({ product, onEdit, onDelete, delay }: ProductCardPro
       </CardContent>
 
       <CardFooter className="p-4 pt-0 flex space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onEdit}
-          className="flex-1 hover:bg-blue-50 hover:border-blue-300 transition-colors bg-transparent group"
-        >
-          <Edit className="mr-2 h-4 w-4 group-hover:text-blue-600 transition-colors" />
-          Editar
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onDelete}
-          className="flex-1 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors bg-transparent group"
-        >
-          <Trash2 className="mr-2 h-4 w-4 group-hover:text-red-600 transition-colors" />
-          Eliminar
-        </Button>
+        {onEdit && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onEdit}
+            className="flex-1 hover:bg-blue-50 hover:border-blue-300 transition-colors bg-transparent group"
+          >
+            <Edit className="mr-2 h-4 w-4 group-hover:text-blue-600 transition-colors" />
+            Editar
+          </Button>
+        )}
+        {onDelete && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onDelete}
+            className="flex-1 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors bg-transparent group"
+          >
+            <Trash2 className="mr-2 h-4 w-4 group-hover:text-red-600 transition-colors" />
+            Eliminar
+          </Button>
+        )}
+        {!onEdit && !onDelete && (
+          <div className="flex-1 text-center text-sm text-gray-400 py-2">
+            Sin permisos de edición
+          </div>
+        )}
       </CardFooter>
     </Card>
   )

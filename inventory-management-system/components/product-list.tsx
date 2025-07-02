@@ -27,8 +27,8 @@ interface Product {
 
 interface ProductListProps {
   products: RawProduct[]
-  onEdit: (product: Product) => void
-  onDelete: (productId: number) => void
+  onEdit?: (product: Product) => void
+  onDelete?: (productId: number) => void
 }
 
 type SortField = "name" | "category" | "price" | "quantity"
@@ -172,12 +172,19 @@ export function ProductList({ products: rawProducts, onEdit, onDelete }: Product
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center justify-center gap-2">
-                          <Button variant="outline" size="sm" onClick={() => onEdit(product)} className="hover:bg-blue-50 hover:border-blue-300 transition-colors bg-transparent group">
-                            <Edit className="h-4 w-4 group-hover:text-blue-600 transition-colors" />
-                          </Button>
-                          <Button variant="outline" size="sm" onClick={() => onDelete(product.id)} className="hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors bg-transparent group">
-                            <Trash2 className="h-4 w-4 group-hover:text-red-600 transition-colors" />
-                          </Button>
+                          {onEdit && (
+                            <Button variant="outline" size="sm" onClick={() => onEdit(product)} className="hover:bg-blue-50 hover:border-blue-300 transition-colors bg-transparent group">
+                              <Edit className="h-4 w-4 group-hover:text-blue-600 transition-colors" />
+                            </Button>
+                          )}
+                          {onDelete && (
+                            <Button variant="outline" size="sm" onClick={() => onDelete(product.id)} className="hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors bg-transparent group">
+                              <Trash2 className="h-4 w-4 group-hover:text-red-600 transition-colors" />
+                            </Button>
+                          )}
+                          {!onEdit && !onDelete && (
+                            <span className="text-sm text-gray-400">Sin permisos</span>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

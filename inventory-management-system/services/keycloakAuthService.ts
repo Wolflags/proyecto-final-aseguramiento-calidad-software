@@ -264,22 +264,68 @@ export const authService = {
   // Verificar si el usuario está autenticado
   isAuthenticated(): boolean {
     const token = getToken()
-    if (!token) return false
+    if (!token) {
+      console.log('No se encontró token de autenticación');
+      return false;
+    }
     
     try {
       const tokenParts = token.split('.')
-      if (tokenParts.length !== 3) return false
+      if (tokenParts.length !== 3) {
+        console.error('Formato de token inválido');
+        return false;
+      }
       
       const payload = JSON.parse(atob(tokenParts[1]))
       
       // Verificar si el token no ha expirado
-      const currentTime = Date.now() / 1000
-      return payload.exp > currentTime
+      const currentTime = Date.now() / 1000;
+      const isValid = payload.exp > currentTime;
+      
+      if (isValid) {
+        console.log(`Token válido, expira en ${Math.floor(payload.exp - currentTime)} segundos`);
+        console.log(`Usuario en token: ${payload.preferred_username || payload.sub}`);
+      } else {
+        console.error(`Token expirado (expiró hace ${Math.floor(currentTime - payload.exp)} segundos)`);
+      }
+      
+      return isValid;
     } catch (e) {
       console.error('Error al verificar token:', e)
       return false
     }
-  }
+  },
+
+  // Obtener información del usuario desde el token almacenado (sin llamadas al servidor)
+  getUserFromToken(): User | null {
+    try {
+      const token = getToken();
+      if (!token) return null;
+
+      // Decodificar token JWT
+      const tokenParts = token.split('.');
+      if (tokenParts.length !== 3) return null;
+      
+      const payload = JSON.parse(atob(tokenParts[1]));
+      
+      // Extraer información básica del usuario desde el token
+      const realmRoles = payload.realm_access?.roles || [];
+      
+      return {
+        username: payload.preferred_username || payload.sub,
+        name: payload.name,
+        email: payload.email,
+        token: token,
+        roles: realmRoles.map((role: string) => ({ 
+          name: role, 
+          authority: `ROLE_${role.toUpperCase()}` 
+        }))
+      };
+    } catch (e) {
+      console.error('Error al obtener información del usuario desde el token:', e);
+      return null;
+    }
+  },
 }
 
 // Funciones auxiliares para manejar el token

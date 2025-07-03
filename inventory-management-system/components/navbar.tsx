@@ -74,15 +74,7 @@ export function Navbar() {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                {/* Notifications - solo para usuarios autenticados */}
-                {/*<Button variant="ghost" size="icon" className="relative">*/}
-                {/*  <Bell className="h-5 w-5" />*/}
-                {/*  {notifications > 0 && (*/}
-                {/*    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-xs">*/}
-                {/*      {notifications}*/}
-                {/*    </Badge>*/}
-                {/*  )}*/}
-                {/*</Button>*/}
+
 
                 {/* User Menu */}
                 <DropdownMenu>
@@ -97,7 +89,6 @@ export function Navbar() {
                       </div>
                       <div className="text-left hidden sm:block">
                         <p className="text-sm font-medium">{user?.username || 'Usuario'}</p>
-                        <p className="text-xs text-gray-500">{getUserRole()}</p>
                       </div>
                     </Button>
                   </DropdownMenuTrigger>
@@ -105,17 +96,8 @@ export function Navbar() {
                     <DropdownMenuLabel>
                       <div>
                         <p className="font-medium">{user?.username || 'Usuario'}</p>
-                        <p className="text-xs text-gray-500 font-normal">
-                          {user?.roles?.map(role => getRoleDisplayName(role.name || role.authority || 'Usuario')).join(', ') || 'Sin roles'}
-                        </p>
                       </div>
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Settings className="mr-2 h-4 w-4" />
-                      Configuración
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       className="text-red-600 focus:text-red-600"
                       onClick={handleLogout}

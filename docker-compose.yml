@@ -11,6 +11,45 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
+    networks:
+      - app-network
+    
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.1
+    container_name: keycloak
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/proyectofinaldb
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: admin
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_RELATIVE_PATH: "/auth"
+      # Configuración CORS
+      KC_SPI_EVENTS_LISTENER: "jboss-logging"
+      KC_CORS: "true"
+      KC_CORS_ALLOWED_ORIGINS: "http://localhost:3000"
+      KC_CORS_ALLOWED_METHODS: "POST, PUT, DELETE, GET, OPTIONS"
+      KC_CORS_ALLOWED_HEADERS: "X-Requested-With, Content-Type, Authorization, Origin, Accept"
+      KC_CORS_EXPOSED_HEADERS: "Location"
+      KC_CORS_ALLOW_CREDENTIALS: "true"
+    command: 
+      - start-dev
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./keycloak-cors.conf:/opt/keycloak/conf/keycloak.conf.d/cors.conf
+    depends_on:
+      - postgres
+    restart: always
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

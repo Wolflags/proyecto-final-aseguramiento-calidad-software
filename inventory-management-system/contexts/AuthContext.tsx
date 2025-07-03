@@ -1,14 +1,15 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
-import { authService, User, JwtResponse, LoginRequest } from '@/services/authService'
+import { authService, User } from '@/services/keycloakAuthService'
 
 interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
-  login: (credentials: LoginRequest) => Promise<void>
+  login: () => void
   logout: () => void
+  setUser: (user: User) => void
   hasRole: (role: string) => boolean
   hasAnyRole: (roles: string[]) => boolean
 }
@@ -28,13 +29,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const initAuth = async () => {
       try {
         if (authService.isAuthenticated()) {
-          const userFromToken = authService.getUserFromToken()
-          if (userFromToken) {
-            setUser(userFromToken)
-          } else {
-            // Si no se puede obtener el usuario del token, intentar desde el servidor
+          // Obtener datos del usuario desde el servidor
+          try {
             const currentUser = await authService.getCurrentUser()
             setUser(currentUser)
+          } catch (userError) {
+            console.error('Error al obtener usuario:', userError)
+            // Si falla, intentaremos renovar el token
+            try {
+              await authService.refreshToken()
+              const refreshedUser = await authService.getCurrentUser()
+              setUser(refreshedUser)
+            } catch (refreshError) {
+              console.error('Error al renovar token:', refreshError)
+              authService.logout()
+            }
           }
         }
       } catch (error) {
@@ -49,23 +58,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     initAuth()
   }, [])
 
-  const login = async (credentials: LoginRequest): Promise<void> => {
-    try {
-      setIsLoading(true)
-      const authData: JwtResponse = await authService.login(credentials)
-      
-      // Crear objeto de usuario desde la respuesta
-      const userData: User = {
-        username: authData.username,
-        roles: authData.roles
-      }
-      
-      setUser(userData)
-    } catch (error) {
-      throw error // Re-lanzar el error para que el componente lo maneje
-    } finally {
-      setIsLoading(false)
-    }
+  const login = (): void => {
+    authService.login()
   }
 
   const logout = (): void => {
@@ -89,6 +83,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading,
     login,
     logout,
+    setUser,
     hasRole,
     hasAnyRole,
   }

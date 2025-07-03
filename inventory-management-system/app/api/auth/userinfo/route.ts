@@ -12,8 +12,8 @@ export async function GET(req: Request) {
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
     
     // Get environment variables
-    const keycloakUrl = process.env.NEXT_PUBLIC_KEYCLOAK_URL;
-    const realm = process.env.NEXT_PUBLIC_KEYCLOAK_REALM;
+    const keycloakUrl = process.env.NEXT_PUBLIC_KEYCLOAK_URL || 'http://localhost:8180/auth';
+    const realm = process.env.NEXT_PUBLIC_KEYCLOAK_REALM || 'inventario-app';
     
     if (!keycloakUrl || !realm) {
       console.error('Missing required environment variables');

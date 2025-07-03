@@ -2,7 +2,7 @@ import axios from 'axios'
 import Cookies from 'js-cookie'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
-const KEYCLOAK_URL = process.env.NEXT_PUBLIC_KEYCLOAK_URL || 'http://localhost:8180'
+const KEYCLOAK_URL = process.env.NEXT_PUBLIC_KEYCLOAK_URL || 'http://localhost:8180/auth'
 const KEYCLOAK_REALM = process.env.NEXT_PUBLIC_KEYCLOAK_REALM || 'inventario-app'
 const KEYCLOAK_CLIENT_ID = process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID || 'inventario-client'
 const KEYCLOAK_CLIENT_SECRET = process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_SECRET || 'wzlUSNeE5MRO2raNFSMrsUo6CENgSWzV'
@@ -63,11 +63,28 @@ export const authService = {
 
   // Cerrar sesión
   logout(): void {
-    clearAuth()
-    const redirectUri = encodeURIComponent(`${window.location.origin}/login`)
-    const logoutUrl = `${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/logout?redirect_uri=${redirectUri}`
+    // Obtiene el ID token para el cierre de sesión OIDC completo
+    const idToken = getIdToken();
     
-    window.location.href = logoutUrl
+    // Limpiar cookies y estado de autenticación local primero
+    clearAuth();
+    
+    // Si no hay token, simplemente redirigir a la página de login
+    if (!idToken) {
+      console.warn('No se encontró id_token para realizar un cierre de sesión completo en Keycloak');
+      window.location.href = '/login';
+      return;
+    }
+    
+    // Construir URL de cierre de sesión con post_logout_redirect_uri e id_token_hint
+    const redirectUri = encodeURIComponent(`${window.location.origin}/`);
+    let logoutUrl = `${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/logout?` +
+                   `post_logout_redirect_uri=${redirectUri}&` +
+                   `id_token_hint=${idToken}`;
+    
+    console.log('Cerrando sesión con URL:', logoutUrl);
+    
+    window.location.href = logoutUrl;
   },
 
   // Procesar el token de Keycloak (llamada cuando se reciba el código de autorización)
@@ -96,6 +113,7 @@ export const authService = {
       // Guardar tokens
       setToken(access_token)
       setRefreshToken(refresh_token)
+      setIdToken(id_token)
       
       // Obtener información del usuario desde el token
       const userInfo = await this.getUserInfo(access_token)
@@ -277,6 +295,18 @@ function getToken(): string | undefined {
   return Cookies.get('auth_token')
 }
 
+function setIdToken(token: string): void {
+  Cookies.set('id_token', token, { 
+    expires: 1, // Expira en 1 día
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  })
+}
+
+function getIdToken(): string | undefined {
+  return Cookies.get('id_token')
+}
+
 function setRefreshToken(token: string): void {
   Cookies.set('refresh_token', token, { 
     expires: 30, // Expira en 30 días
@@ -291,6 +321,7 @@ function getRefreshToken(): string | undefined {
 
 function clearAuth(): void {
   Cookies.remove('auth_token')
+  Cookies.remove('id_token')
   Cookies.remove('refresh_token')
 }
 

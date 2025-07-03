@@ -75,14 +75,14 @@ export function Navbar() {
             {isAuthenticated ? (
               <>
                 {/* Notifications - solo para usuarios autenticados */}
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-5 w-5" />
-                  {notifications > 0 && (
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-xs">
-                      {notifications}
-                    </Badge>
-                  )}
-                </Button>
+                {/*<Button variant="ghost" size="icon" className="relative">*/}
+                {/*  <Bell className="h-5 w-5" />*/}
+                {/*  {notifications > 0 && (*/}
+                {/*    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-xs">*/}
+                {/*      {notifications}*/}
+                {/*    </Badge>*/}
+                {/*  )}*/}
+                {/*</Button>*/}
 
                 {/* User Menu */}
                 <DropdownMenu>

@@ -45,6 +45,8 @@ dependencies {
     // Flyway for database migrations
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-database-postgresql'
+    // OAuth2 Resource Server
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
 
 }

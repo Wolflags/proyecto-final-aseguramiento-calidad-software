@@ -16,11 +16,16 @@ services:
     image: quay.io/keycloak/keycloak:26.1.3
     container_name: keycloak
     ports:
-      - "9090:9090"      # host:container (ambos 9090)
+      - "9090:9090"
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-    command: [ "start-dev", "--http-port=9090" ]
+      # Credenciales de admin inicial
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    volumes:
+      # Montamos tu exportación bajo el directorio de importación de Keycloak
+      - ./realm-config/realm.json:/opt/keycloak/data/import/realm.json
+    # Inicia en modo desarrollo e importa cualquier JSON en data/import
+    command: ["start-dev","--http-port=9090","--import-realm"]
 
 volumes:
   postgres_data:

@@ -18,7 +18,7 @@ package org.example.proyectofinal.controller;
         private final ProductoService productoService;
 
         @PostMapping
-        @PreAuthorize("hasRole('ADMIN')")
+        @PreAuthorize("hasAuthority('ADMIN')")
         public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
             return ResponseEntity.ok(productoService.crearProducto(producto));
         }
@@ -34,13 +34,13 @@ package org.example.proyectofinal.controller;
         }
 
         @PutMapping("/{id}")
-        @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLEADO')")
+        @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('EMPLEADO')")
         public ResponseEntity<Producto> actualizarProducto(@PathVariable Long id, @RequestBody Producto productoActualizado) {
             return ResponseEntity.ok(productoService.actualizarProducto(id, productoActualizado));
         }
 
         @DeleteMapping("/{id}")
-        @PreAuthorize("hasRole('ADMIN')")
+        @PreAuthorize("hasAuthority('ADMIN')")
         public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
             return productoService.eliminarProducto(id);
         }

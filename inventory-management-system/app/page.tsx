@@ -202,7 +202,7 @@ export default function InventoryDashboard() {
             </div>
 
             {canCreateProducts && (
-              <Button onClick={() => openModal()} className="h-12 px-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
+              <Button id="addButton" onClick={() => openModal()} className="h-12 px-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
                 <Plus className="mr-2 h-4 w-4" /> Agregar
               </Button>
             )}

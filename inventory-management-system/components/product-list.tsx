@@ -173,7 +173,7 @@ export function ProductList({ products: rawProducts, onEdit, onDelete }: Product
                       <TableCell>
                         <div className="flex items-center justify-center gap-2">
                           {onEdit && (
-                            <Button variant="outline" size="sm" onClick={() => onEdit(product)} className="hover:bg-blue-50 hover:border-blue-300 transition-colors bg-transparent group">
+                            <Button id="editButton" variant="outline" size="sm" onClick={() => onEdit(product)} className="hover:bg-blue-50 hover:border-blue-300 transition-colors bg-transparent group">
                               <Edit className="h-4 w-4 group-hover:text-blue-600 transition-colors" />
                             </Button>
                           )}

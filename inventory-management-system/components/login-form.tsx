@@ -56,6 +56,7 @@ export function LoginForm() {
             onClick={handleLogin}
             className="w-full"
             disabled={isLoading}
+            id="kc-login"
           >
             {isLoading ? (
               <>

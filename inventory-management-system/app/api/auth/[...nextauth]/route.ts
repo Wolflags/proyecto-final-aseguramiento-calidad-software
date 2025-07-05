@@ -4,7 +4,6 @@ import { NextAuthOptions } from "next-auth"
 const clientId = "inventario-frontend"
 const issuer = "http://localhost:9090/realms/InventarioRealm"
 
-// Interfaces para tipos
 interface KeycloakProfile {
   sub: string
   name?: string
@@ -12,6 +11,20 @@ interface KeycloakProfile {
   preferred_username?: string
   realm_access?: {
     roles?: string[]
+  }
+}
+
+// Función para validar token con Keycloak
+async function validateToken(token: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${issuer}/protocol/openid-connect/userinfo`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    return response.ok
+  } catch (error) {
+    return false
   }
 }
 
@@ -23,9 +36,8 @@ export const authOptions: NextAuthOptions = {
       type: "oauth",
       wellKnown: `${issuer}/.well-known/openid-configuration`,
       clientId: clientId,
-      clientSecret: undefined, // Cliente público sin secreto
+      clientSecret: undefined,
       client: {
-        // 🔑 ESTA ES LA LÍNEA CLAVE QUE FALTABA
         token_endpoint_auth_method: "none"
       },
       authorization: { 
@@ -48,6 +60,7 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, account, profile }) {
+      // En el primer login
       if (account?.access_token) {
         token.accessToken = account.access_token
         token.refreshToken = account.refresh_token
@@ -59,16 +72,52 @@ export const authOptions: NextAuthOptions = {
         token.username = keycloakProfile.preferred_username
         token.roles = keycloakProfile.realm_access?.roles || []
       }
+
+      // 🔑 VALIDAR TOKEN EN CADA REQUEST
+      if (token.accessToken) {
+        const isValid = await validateToken(token.accessToken as string)
+        if (!isValid) {
+          // Token inválido, forzar logout
+          console.log('Token invalidado por Keycloak, limpiando sesión')
+          return {}
+        }
+      }
       
       return token
     },
     async session({ session, token }) {
-      if (token?.accessToken) {
-        session.accessToken = token.accessToken as string
-        session.user.username = token.username as string
-        session.user.roles = token.roles as string[]
+      // Si el token está vacío (invalidado), no crear sesión
+      if (!token.accessToken) {
+        return {} as any
       }
+
+      session.accessToken = token.accessToken as string
+      session.user.username = token.username as string
+      session.user.roles = token.roles as string[]
+      
       return session
+    }
+  },
+  events: {
+    // Evento cuando se invalida sesión
+    async signOut({ token }) {
+      if (token?.accessToken) {
+        // Opcional: Llamar al logout endpoint de Keycloak
+        try {
+          await fetch(`${issuer}/protocol/openid-connect/logout`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              client_id: clientId,
+              refresh_token: token.refreshToken as string || '',
+            }),
+          })
+        } catch (error) {
+          console.error('Error al invalidar en Keycloak:', error)
+        }
+      }
     }
   },
   pages: {
@@ -76,7 +125,8 @@ export const authOptions: NextAuthOptions = {
     error: '/login'
   },
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
+    maxAge: 30 * 60, // 30 minutos
   },
   debug: process.env.NODE_ENV === 'development',
 }

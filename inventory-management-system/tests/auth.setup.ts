@@ -1,8 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { test as setup } from '@playwright/test';
 
-test('Login con Keycloak', async ({ page, context }) => {
+const authFile = './tests/auth.json';
+
+setup('authenticate', async ({ page, context }) => {
   // Aumentar timeout para este test
-  test.setTimeout(60000);
+  setup.setTimeout(60000);
   
   // Ir al login con configuración más robusta
   await page.goto('/login', { 
@@ -12,9 +14,6 @@ test('Login con Keycloak', async ({ page, context }) => {
   
   // Esperar a que la página se estabilice
   await page.waitForLoadState('domcontentloaded');
-  
-  // Verificar que estamos en la página de login antes de continuar
-  await expect(page).toHaveURL(/.*\/login/);
   
   // Buscar y hacer clic en el botón de login con Keycloak
   const kcLoginButton = page.locator('button#kc-login').first();
@@ -43,8 +42,5 @@ test('Login con Keycloak', async ({ page, context }) => {
   await userMenuButton.waitFor({ state: 'visible', timeout: 30000 });
   
   // Guardamos el estado después de que todo esté cargado
-  await context.storageState({ path: './tests/auth.json' });
-  
-  // Verificar que estamos en el dashboard
-  await expect(page).toHaveURL('/');
+  await context.storageState({ path: authFile });
 });

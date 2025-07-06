@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.use({ storageState: 'auth.json' });
+test.use({ storageState: './tests/auth.json' });
 
 test('Crear un nuevo producto', async ({ page }) => {
   // Ir a la página de crear producto

@@ -6,6 +6,7 @@ CREATE TABLE producto
     categoria        VARCHAR(255),
     precio           DOUBLE PRECISION                        NOT NULL,
     cantidad_inicial INTEGER                                 NOT NULL,
+    fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT pk_producto PRIMARY KEY (id)
 );
 

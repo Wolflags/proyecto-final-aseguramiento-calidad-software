@@ -19,8 +19,9 @@ public class ApiIntegracionController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
-        return ResponseEntity.ok(productoService.crearProducto(producto));
+    public ResponseEntity<ResponseEntity<String>> crearProducto(@RequestBody Producto producto) {
+        ResponseEntity<String> createdProducto = productoService.crearProducto(producto);
+        return ResponseEntity.ok(createdProducto);
     }
 
     @GetMapping("/listar")
@@ -42,7 +43,8 @@ public class ApiIntegracionController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
-        return productoService.eliminarProducto(id);
+        productoService.eliminarProducto(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/buscar/nombre")

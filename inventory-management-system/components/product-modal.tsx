@@ -135,6 +135,7 @@
               <Label htmlFor="name">Nombre del Producto *</Label>
               <Input
                 id="name"
+                name="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 placeholder="Ej: Laptop Gaming RGB"
@@ -146,6 +147,7 @@
             <div className="space-y-2">
               <Label htmlFor="description">Descripción *</Label>
               <Textarea
+                name="description"
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleInputChange("description", e.target.value)}
@@ -158,7 +160,7 @@
 
             <div className="space-y-2">
               <Label>Categoría *</Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
+              <Select name="category" value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
                 <SelectTrigger
                   className={`transition-colors ${errors.category ? "border-red-500 focus:border-red-500" : "focus:border-purple-500"}`}
                 >
@@ -179,6 +181,7 @@
               <div className="space-y-2">
                 <Label htmlFor="price">Precio ($) *</Label>
                 <Input
+                  name="price"
                   id="price"
                   type="number"
                   step="0.01"
@@ -194,6 +197,7 @@
               <div className="space-y-2">
                 <Label htmlFor="quantity">Cantidad *</Label>
                 <Input
+                  name="quantity"
                   id="quantity"
                   type="number"
                   min="0"
@@ -220,6 +224,7 @@
                 Cancelar
               </Button>
               <Button
+                id="submitButton"
                 type="submit"
                 className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all"
               >

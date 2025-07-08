@@ -20,7 +20,7 @@ package org.example.proyectofinal.controller;
         @PostMapping
         @PreAuthorize("hasAuthority('ADMIN')")
         public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
-            return ResponseEntity.ok(productoService.crearProducto(producto));
+            return ResponseEntity.status(201).body(productoService.crearProducto(producto));
         }
 
         @GetMapping("/listar")

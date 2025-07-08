@@ -15,10 +15,10 @@ import static io.cucumber.spring.CucumberTestContext.SCOPE_CUCUMBER_GLUE;
 
 @Component
 @Scope(SCOPE_CUCUMBER_GLUE)
-public class HttpClient {
+public class HttpClientx {
 
     private String SERVER_URL = "http://localhost:";
-    private String LOGIN_ENDPOINT = "http://localhost:9090/auth/realms/InventarioRealm/protocol/openid-connect/token";
+    private String LOGIN_ENDPOINT = "http://localhost:9090/realms/InventarioRealm/protocol/openid-connect/token";
     private final static String CREATE_PRODUCT_ENDPOINT = "/api/productos";
     private final static String UPDATE_PRODUCT_ENDPOINT = "/api/productos";
     private final static String DELETE_PRODUCT_ENDPOINT = "/api/productos";
@@ -29,7 +29,7 @@ public class HttpClient {
 
     private final TestRestTemplate restTemplate;
 
-    public HttpClient(TestRestTemplate restTemplate) {
+    public HttpClientx(TestRestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 

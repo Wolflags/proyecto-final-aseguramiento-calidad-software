@@ -144,5 +144,20 @@ public class HttpClientx {
         );
     }
 
+    public ResponseEntity<String> getProductById(Long productId) {
+        String url = SERVER_URL + port + "/api/productos/" + productId;
+        return restTemplate.getForEntity(url, String.class);
+    }
+
+    public ResponseEntity<String> searchProductsByName(String name) {
+        String url = SERVER_URL + port + "/api/productos/buscar/nombre?nombre=" + name;
+        return restTemplate.getForEntity(url, String.class);
+    }
+
+    public ResponseEntity<String> searchProductsByCategory(String category) {
+        String url = SERVER_URL + port + "/api/productos/buscar/categoria?categoria=" + category;
+        return restTemplate.getForEntity(url, String.class);
+    }
+
 
 }

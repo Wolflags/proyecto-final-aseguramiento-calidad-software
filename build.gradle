@@ -23,6 +23,9 @@ repositories {
     mavenCentral()
 }
 
+def cucumberVersion = '7.6.0'
+def junitPlatformVersion = '1.9.0'
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -34,7 +37,10 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    // JUnit 5
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation "org.junit.platform:junit-platform-suite-api:${junitPlatformVersion}"
+    testRuntimeOnly "org.junit.platform:junit-platform-suite-engine:${junitPlatformVersion}"
     // Spring Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     // JWT
@@ -47,6 +53,10 @@ dependencies {
     implementation 'org.flywaydb:flyway-database-postgresql'
     // OAuth2 Resource Server
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    // Cucumber
+    testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
+    testImplementation "io.cucumber:cucumber-spring:${cucumberVersion}"
+    testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberVersion}"
 
 
 }

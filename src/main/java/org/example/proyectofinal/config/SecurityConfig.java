@@ -74,7 +74,14 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/productos").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasAnyAuthority("ADMIN", "EMPLEADO")
                 .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasAuthority("ADMIN")
+
+                // Api integración
+                .requestMatchers(HttpMethod.GET, "/api/integracion/productos/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/integracion/productos").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/integracion/productos/**").hasAnyAuthority("ADMIN", "EMPLEADO")
+                .requestMatchers(HttpMethod.DELETE, "/api/integracion/productos/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
+
             )
             .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthConverter())))

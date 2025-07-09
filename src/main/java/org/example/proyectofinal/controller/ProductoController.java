@@ -26,6 +26,9 @@ package org.example.proyectofinal.controller;
             if (producto.getPrecio() <= 0) {
                 return ResponseEntity.badRequest().build();
             }
+            if (producto.getCantidadInicial() < 0) {
+                return ResponseEntity.badRequest().build();
+            }
             return ResponseEntity.status(201).body(productoService.crearProducto(producto));
         }
 

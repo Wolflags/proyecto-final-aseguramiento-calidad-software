@@ -13,14 +13,23 @@ import java.util.List;
 @RequestMapping("/api/integracion/productos")
 @RequiredArgsConstructor
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001"})
-public class ApiIntegracionController {
+public class ApiIntegrationController {
 
     private final ProductoService productoService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
-        return ResponseEntity.ok(productoService.crearProducto(producto));
+        if (producto.getNombre() == null || producto.getNombre().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (producto.getPrecio() <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (producto.getCantidadInicial() < 0) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.status(201).body(productoService.crearProducto(producto));
     }
 
     @GetMapping("/listar")
@@ -34,13 +43,13 @@ public class ApiIntegracionController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLEADO')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('EMPLEADO')")
     public ResponseEntity<Producto> actualizarProducto(@PathVariable Long id, @RequestBody Producto productoActualizado) {
         return ResponseEntity.ok(productoService.actualizarProducto(id, productoActualizado));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
         return productoService.eliminarProducto(id);
     }

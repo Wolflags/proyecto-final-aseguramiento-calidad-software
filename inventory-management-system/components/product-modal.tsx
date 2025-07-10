@@ -109,7 +109,7 @@ export function ProductModal({ isOpen, onClose, product, onRefresh = () => {} }:
             .catch((error) => {
               const msg = error?.response?.data || "Error al crear producto"
               toast.error(msg)
-              console.error("Error al crear producto", error)
+
       })
 
       }

@@ -50,7 +50,7 @@ package org.example.proyectofinal.controller;
 
         @DeleteMapping("/{id}")
         @PreAuthorize("hasAuthority('ADMIN')")
-        public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
+        public ResponseEntity<String> eliminarProducto(@PathVariable Long id) {
             return productoService.eliminarProducto(id);
         }
 

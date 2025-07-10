@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/integracion/productos")
+@RequestMapping("/api/integration/productos")
 @RequiredArgsConstructor
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001"})
 public class ApiIntegrationController {
@@ -50,7 +50,7 @@ public class ApiIntegrationController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
+    public ResponseEntity<String> eliminarProducto(@PathVariable Long id) {
         return productoService.eliminarProducto(id);
     }
 

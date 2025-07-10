@@ -75,11 +75,13 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasAnyAuthority("ADMIN", "EMPLEADO")
                 .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasAuthority("ADMIN")
 
-                // Api integración
-                .requestMatchers(HttpMethod.GET, "/api/integracion/productos/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/integracion/productos").hasAuthority("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/integracion/productos/**").hasAnyAuthority("ADMIN", "EMPLEADO")
-                .requestMatchers(HttpMethod.DELETE, "/api/integracion/productos/**").hasAuthority("ADMIN")
+
+                // Api integration
+                .requestMatchers(HttpMethod.GET, "/api/integration/productos/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/integration/productos").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/integration/productos/**").hasAnyAuthority("ADMIN", "EMPLEADO")
+                .requestMatchers(HttpMethod.DELETE, "/api/integration/productos/**").hasAuthority("ADMIN")
+
                 .anyRequest().authenticated()
 
             )

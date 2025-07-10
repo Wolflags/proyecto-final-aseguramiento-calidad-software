@@ -53,9 +53,14 @@ export default function InventoryDashboard() {
   const [selectedCategory, setSelectedCategory] = useState("Todos")
   const [maxPrice, setMaxPrice] = useState(0)
   const [priceRange, setPriceRange] = useState<number[]>([0])
-  
+
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 8
+
   const { hasRole, hasAnyRole, isAuthenticated } = useAuth()
-  
+
   // Verificar permisos para diferentes acciones (solo si está autenticado)
   const canCreateProducts = isAuthenticated && hasAnyRole(['ADMIN', 'EMPLEADO'])
   const canEditProducts = isAuthenticated && hasAnyRole(['ADMIN', 'EMPLEADO'])
@@ -82,6 +87,11 @@ export default function InventoryDashboard() {
           (selectedCategory === "Todos" || product.categoria === selectedCategory) &&
           product.precio <= priceRange[0]
   )
+  // Paginación: productos visibles en la página actual
+  const indexOfLast = currentPage * itemsPerPage
+  const indexOfFirst = indexOfLast - itemsPerPage
+  const currentProducts = filteredProducts.slice(indexOfFirst, indexOfLast)
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
 
   const totalProducts = products.length
   const totalValue = products.reduce((sum, p) => sum + p.precio * p.cantidadInicial, 0)
@@ -112,6 +122,11 @@ export default function InventoryDashboard() {
       openModal(originalProduct || null)
     }
   }
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-cyan-50">
@@ -131,9 +146,9 @@ export default function InventoryDashboard() {
                   <p className="text-xs text-blue-600">Estás viendo el inventario como invitado. Para gestionar productos, inicia sesión.</p>
                 </div>
               </div>
-              <Button 
-                onClick={() => window.location.href = '/login'} 
-                size="sm" 
+              <Button
+                onClick={() => window.location.href = '/login'}
+                size="sm"
                 className="bg-blue-600 hover:bg-blue-700"
               >
                 Iniciar Sesión
@@ -148,7 +163,7 @@ export default function InventoryDashboard() {
             Sistema de Gestión de Inventarios
           </h1>
           <p className="text-gray-600 text-lg">
-            {isAuthenticated 
+            {isAuthenticated
               ? "Administra tu inventario de manera eficiente y moderna"
               : "Explora nuestro catálogo de productos disponibles"
             }
@@ -210,14 +225,14 @@ export default function InventoryDashboard() {
 
           {/* Productos */}
           {viewMode === "list" ? (
-              <ProductList 
-                products={filteredProducts.map(mapProductoToRawProduct)} 
-                onEdit={canEditProducts ? handleEditModal : undefined} 
-                onDelete={canDeleteProducts ? handleDeleteProduct : undefined} 
+              <ProductList
+                products={currentProducts.map(mapProductoToRawProduct)}
+                onEdit={canEditProducts ? handleEditModal : undefined}
+                onDelete={canDeleteProducts ? handleDeleteProduct : undefined}
               />
           ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredProducts.map((product, index) => (
+                {currentProducts.map((product, index) => (
                     <ProductCard
                         key={product.id}
                         product={mapProductoToProduct(product)}
@@ -228,11 +243,39 @@ export default function InventoryDashboard() {
                 ))}
               </div>
           )}
+        {/* Paginación simple */}
+        {totalPages > 1 && (
+            <div className="flex justify-center items-center space-x-3 mt-6">
+              <Button
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+                variant="outline"
+              >
+                Anterior
+              </Button>
+              {[...Array(totalPages)].map((_, i) => (
+                <Button
+                  key={i}
+                  onClick={() => handlePageChange(i + 1)}
+                  variant={currentPage === i + 1 ? "default" : "outline"}
+                >
+                  {i + 1}
+                </Button>
+              ))}
+              <Button
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+                variant="outline"
+              >
+                Siguiente
+              </Button>
+            </div>
+        )}
 
           {filteredProducts.length === 0 && (
-              <EmptyState 
-                type={searchTerm ? "no-search-results" : "no-products"} 
-                onAddProduct={searchTerm || !canCreateProducts ? undefined : () => openModal()} 
+              <EmptyState
+                type={searchTerm ? "no-search-results" : "no-products"}
+                onAddProduct={searchTerm || !canCreateProducts ? undefined : () => openModal()}
                 isAuthenticated={isAuthenticated}
               />
           )}

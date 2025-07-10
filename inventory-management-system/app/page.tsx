@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { toast, Toaster } from "sonner"
 import {
   Package, Plus, Search, AlertTriangle, DollarSign, BarChart3, LayoutGrid, List
 } from "lucide-react"
@@ -17,6 +18,8 @@ import {
   listarProductos, crearProducto, actualizarProducto, eliminarProducto, Producto
 } from "@/services/productoService"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+
 import { ProtectedRoute } from "@/components/protected-route"
 import { useAuth } from "@/contexts/AuthContext"
 
@@ -49,6 +52,7 @@ export default function InventoryDashboard() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
+  const [productToDelete, setProductToDelete] = useState<number | null>(null)
   const [viewMode, setViewMode] = useState("list")
   const [selectedCategory, setSelectedCategory] = useState("Todos")
   const [maxPrice, setMaxPrice] = useState(0)
@@ -98,10 +102,22 @@ export default function InventoryDashboard() {
   const lowStockProducts = products.filter((p) => p.cantidadInicial < 10).length
   const categoriesCount = [...new Set(products.map((p) => p.categoria))].length
 
-  const handleDeleteProduct = (id: number) => {
-    eliminarProducto(id)
-        .then(() => fetchProducts())
-        .catch((error) => console.error("Error al eliminar producto", error))
+  const confirmDeleteProduct = () => {
+    if (productToDelete !== null) {
+      eliminarProducto(productToDelete)
+          .then(() => {
+            fetchProducts()
+            toast.success("🗑️ Producto eliminado correctamente")
+          })
+          .catch((error) => {
+            console.error("Error al eliminar producto", error)
+            toast.error("❌ Error al eliminar producto")
+          })
+          .finally(() => setProductToDelete(null))
+    }
+  }
+  const handleDeleteRequest = (id: number) => {
+    setProductToDelete(id)
   }
 
   const openModal = (product: Producto | null = null) => {
@@ -228,7 +244,7 @@ export default function InventoryDashboard() {
               <ProductList
                 products={currentProducts.map(mapProductoToRawProduct)}
                 onEdit={canEditProducts ? handleEditModal : undefined}
-                onDelete={canDeleteProducts ? handleDeleteProduct : undefined}
+                onDelete={canDeleteProducts ? handleDeleteRequest : undefined}
               />
           ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -237,7 +253,7 @@ export default function InventoryDashboard() {
                         key={product.id}
                         product={mapProductoToProduct(product)}
                         onEdit={canEditProducts ? () => openModal(product) : undefined}
-                        onDelete={canDeleteProducts ? () => handleDeleteProduct(product.id!) : undefined}
+                        onDelete={canDeleteProducts ? () => handleDeleteRequest(product.id!) : undefined}
                         delay={index * 100}
                     />
                 ))}
@@ -271,6 +287,20 @@ export default function InventoryDashboard() {
               </Button>
             </div>
         )}
+
+        {/* Confirmar eliminar producto */}
+        <AlertDialog open={productToDelete !== null} onOpenChange={() => setProductToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>¿Estás seguro de eliminar este producto?</AlertDialogTitle>
+              <AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDeleteProduct}>Eliminar</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
           {filteredProducts.length === 0 && (
               <EmptyState

@@ -107,11 +107,11 @@ export default function InventoryDashboard() {
       eliminarProducto(productToDelete)
           .then(() => {
             fetchProducts()
-            toast.success("🗑️ Producto eliminado correctamente")
+            toast.success("Producto eliminado correctamente")
           })
           .catch((error) => {
             console.error("Error al eliminar producto", error)
-            toast.error("❌ Error al eliminar producto")
+            toast.error("Error al eliminar producto")
           })
           .finally(() => setProductToDelete(null))
     }
@@ -309,6 +309,8 @@ export default function InventoryDashboard() {
                   isAuthenticated={isAuthenticated}
               />
           )}
+          <Toaster richColors position="top-right" />
+
         </main>
 
         <ProductModal
@@ -316,6 +318,7 @@ export default function InventoryDashboard() {
             onClose={() => setIsModalOpen(false)}
             product={selectedProduct ? mapProductoToProduct(selectedProduct) : null}
             onRefresh={fetchProducts}
+            onSuccess={() => toast.success("Producto agregado correctamente")}
         />
       </div>
   )

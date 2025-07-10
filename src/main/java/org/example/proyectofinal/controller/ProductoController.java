@@ -3,6 +3,7 @@ package org.example.proyectofinal.controller;
     import lombok.RequiredArgsConstructor;
     import org.example.proyectofinal.entities.Producto;
     import org.example.proyectofinal.services.ProductoService;
+    import org.springframework.http.HttpStatus;
     import org.springframework.http.ResponseEntity;
     import org.springframework.security.access.prepost.PreAuthorize;
     import org.springframework.web.bind.annotation.*;
@@ -19,18 +20,25 @@ package org.example.proyectofinal.controller;
 
         @PostMapping
         @PreAuthorize("hasAuthority('ADMIN')")
-        public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
+        public ResponseEntity<?> crearProducto(@RequestBody Producto producto) {
             if (producto.getNombre() == null || producto.getNombre().isEmpty()) {
-                return ResponseEntity.badRequest().build();
+                return ResponseEntity.badRequest().body("El nombre es obligatorio");
             }
             if (producto.getPrecio() <= 0) {
-                return ResponseEntity.badRequest().build();
+                return ResponseEntity.badRequest().body("El precio debe ser mayor a cero");
             }
             if (producto.getCantidadInicial() < 0) {
-                return ResponseEntity.badRequest().build();
+                return ResponseEntity.badRequest().body("La cantidad inicial no puede ser negativa");
             }
-            return ResponseEntity.status(201).body(productoService.crearProducto(producto));
+
+            try {
+                Producto nuevoProducto = productoService.crearProducto(producto);
+                return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
+            } catch (IllegalArgumentException ex) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+            }
         }
+
 
         @GetMapping("/listar")
         public ResponseEntity<List<Producto>> listarProductos() {

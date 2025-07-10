@@ -14,15 +14,13 @@ import java.util.List;
 public class ProductoService {
     private final ProductoRepository productoRepository;
 
-    public ResponseEntity<String> crearProducto(Producto producto) {
+    public Producto crearProducto(Producto producto) {
         if (productoRepository.existsByNombre(producto.getNombre())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Ya existe un producto con el nombre: " + producto.getNombre());
+            throw new IllegalArgumentException("Ya existe un producto con el nombre: " + producto.getNombre());
         }
-        productoRepository.save(producto);
-
-        return ResponseEntity.ok("Producto creado exitosamente: " + producto.getNombre());
+        return productoRepository.save(producto);
     }
+
 
     public List<Producto> listarProductos() {
         return productoRepository.findAll();

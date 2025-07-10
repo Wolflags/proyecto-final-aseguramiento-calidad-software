@@ -87,7 +87,7 @@ export function Navbar() {
                 {/* User Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center space-x-2 hover:bg-purple-50">
+                    <Button variant="ghost" className="flex items-center space-x-2 hover:bg-purple-50" id="userMenuButton">
                       <div className={`w-8 h-8 bg-gradient-to-r ${getRoleColor()} rounded-full flex items-center justify-center`}>
                         {hasRole('ADMIN') ? (
                           <Shield className="h-4 w-4 text-white" />

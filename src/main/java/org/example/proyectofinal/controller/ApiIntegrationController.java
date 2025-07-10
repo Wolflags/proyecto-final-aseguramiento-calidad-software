@@ -10,16 +10,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/integracion/productos")
+@RequestMapping("/api/integration/productos")
 @RequiredArgsConstructor
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://127.0.0.1:3000", "http://127.0.0.1:3001"})
-public class ApiIntegracionController {
+public class ApiIntegrationController {
 
     private final ProductoService productoService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Producto> crearProducto(@RequestBody Producto producto) {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<ResponseEntity<String>> crearProducto(@RequestBody Producto producto) {
         return ResponseEntity.ok(productoService.crearProducto(producto));
     }
 
@@ -34,14 +34,14 @@ public class ApiIntegracionController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('EMPLEADO')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('EMPLEADO')")
     public ResponseEntity<Producto> actualizarProducto(@PathVariable Long id, @RequestBody Producto productoActualizado) {
         return ResponseEntity.ok(productoService.actualizarProducto(id, productoActualizado));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<String> eliminarProducto(@PathVariable Long id) {
         return productoService.eliminarProducto(id);
     }
 

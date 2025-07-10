@@ -3,6 +3,7 @@ package org.example.proyectofinal.services;
 import lombok.RequiredArgsConstructor;
 import org.example.proyectofinal.entities.Producto;
 import org.example.proyectofinal.repositories.ProductoRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +14,14 @@ import java.util.List;
 public class ProductoService {
     private final ProductoRepository productoRepository;
 
-    public Producto crearProducto(Producto producto) {
-        return productoRepository.save(producto);
+    public ResponseEntity<String> crearProducto(Producto producto) {
+        if (productoRepository.existsByNombre(producto.getNombre())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body("Ya existe un producto con el nombre: " + producto.getNombre());
+        }
+        productoRepository.save(producto);
+
+        return ResponseEntity.ok("Producto creado exitosamente: " + producto.getNombre());
     }
 
     public List<Producto> listarProductos() {
@@ -47,9 +54,9 @@ public class ProductoService {
         return productoRepository.save(productoExistente);
     }
 
-    public ResponseEntity<Void> eliminarProducto(Long id) {
+    public ResponseEntity<String> eliminarProducto(Long id) {
         Producto productoExistente = obtenerProductoPorId(id);
         productoRepository.delete(productoExistente);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Producto eliminado exitosamente");
     }
 }

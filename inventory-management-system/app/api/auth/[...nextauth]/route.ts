@@ -73,7 +73,7 @@ export const authOptions: NextAuthOptions = {
         token.roles = keycloakProfile.realm_access?.roles || []
       }
 
-      // 🔑 VALIDAR TOKEN EN CADA REQUEST
+      // VALIDAR TOKEN EN CADA REQUEST
       if (token.accessToken) {
         const isValid = await validateToken(token.accessToken as string)
         if (!isValid) {

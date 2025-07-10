@@ -35,3 +35,5 @@ out/
 
 ### VS Code ###
 .vscode/
+/inventory-management-system/auth.json
+/inventory-management-system/tests/auth.json

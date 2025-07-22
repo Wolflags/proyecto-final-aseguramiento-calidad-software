@@ -3,16 +3,21 @@
 import { useState, useEffect } from "react"
 import { toast, Toaster } from "sonner"
 import {
-  Package, Plus, Search, AlertTriangle, DollarSign, BarChart3, LayoutGrid, List
+  Package, Plus, Search, AlertTriangle, DollarSign, BarChart3, LayoutGrid, List, 
+  History, TrendingUp, Zap
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ProductModal } from "@/components/product-modal"
 import { ProductCard } from "@/components/product-card"
 import { StatsCard } from "@/components/stats-card"
 import { Navbar } from "@/components/navbar"
 import { EmptyState } from "@/components/empty-state"
 import { ProductList } from "@/components/product-list"
+import { StockMovementModal } from "@/components/stock-movement-modal"
+import { StockAlerts } from "@/components/stock-alerts"
+import { StockHistory } from "@/components/stock-history"
 import { Slider } from "@/components/ui/slider"
 import {
   listarProductos, crearProducto, actualizarProducto, eliminarProducto, Producto
@@ -51,13 +56,15 @@ export default function InventoryDashboard() {
   const [products, setProducts] = useState<Producto[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isStockModalOpen, setIsStockModalOpen] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Producto | null>(null)
+  const [selectedProductForStock, setSelectedProductForStock] = useState<number | undefined>(undefined)
   const [productToDelete, setProductToDelete] = useState<number | null>(null)
   const [viewMode, setViewMode] = useState("list")
   const [selectedCategory, setSelectedCategory] = useState("Todos")
   const [maxPrice, setMaxPrice] = useState(0)
   const [priceRange, setPriceRange] = useState<number[]>([0])
-
+  const [activeTab, setActiveTab] = useState("productos")
 
   // Paginación
   const [currentPage, setCurrentPage] = useState(1)
@@ -69,17 +76,22 @@ export default function InventoryDashboard() {
   const canCreateProducts = isAuthenticated && hasAnyRole(['ADMIN', 'EMPLEADO'])
   const canEditProducts = isAuthenticated && hasAnyRole(['ADMIN', 'EMPLEADO'])
   const canDeleteProducts = isAuthenticated && hasRole('ADMIN')
+  const canManageStock = isAuthenticated && hasAnyRole(['ADMIN', 'EMPLEADO'])
 
-  const fetchProducts = () => {
-    listarProductos()
+    const fetchProducts = () => {
+      listarProductos()
         .then((res) => {
-          setProducts(res.data)
-          const highestPrice = Math.max(...res.data.map((p: Producto) => p.precio), 0)
-          setMaxPrice(highestPrice)
-          setPriceRange([highestPrice])
+          console.log("Fetched products:", res.data); // Debugging the data
+          const sorted = [...res.data].sort((a, b) => Number(b.id) - Number(a.id)); // Ensure numeric sorting
+          console.log("Sorted products:", sorted); // Verify sorting
+          setProducts(sorted);
+          const highestPrice = Math.max(...sorted.map((p) => p.precio), 0);
+          setMaxPrice(highestPrice);
+          setPriceRange([highestPrice]);
         })
-        .catch((error) => console.error("Error al cargar productos", error))
-  }
+        .catch((error) => console.error("Error al cargar productos", error));
+    };
+
 
   useEffect(() => {
     fetchProducts()
@@ -123,6 +135,21 @@ export default function InventoryDashboard() {
   const openModal = (product: Producto | null = null) => {
     setSelectedProduct(product)
     setIsModalOpen(true)
+  }
+
+  const openStockModal = (productoId?: number) => {
+    setSelectedProductForStock(productoId)
+    setIsStockModalOpen(true)
+  }
+
+  const closeStockModal = () => {
+    setSelectedProductForStock(undefined)
+    setIsStockModalOpen(false)
+  }
+
+  const handleStockSuccess = () => {
+    fetchProducts() // Refresh products to show updated stock
+    toast.success("Stock actualizado correctamente")
   }
 
   // Función para crear una función onEdit que maneje el mapeo correcto
@@ -194,99 +221,200 @@ export default function InventoryDashboard() {
             <StatsCard title="Categorías" value={categoriesCount} icon={BarChart3} color="from-purple-500 to-pink-500" delay="300" />
           </div>
 
-          {/* Filtros */}
-          <div className="flex flex-col md:flex-row gap-4 mb-8 animate-slide-up" style={{ animationDelay: "400ms" }}>
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                  placeholder="Buscar productos por nombre..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-12 border-2 border-gray-200 focus:border-purple-500 transition-colors"
-              />
-            </div>
+          {/* Tabs Navigation */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-4 mb-8 h-12">
+              <TabsTrigger value="productos" className="flex items-center gap-2">
+                <Package className="h-4 w-4" />
+                Productos
+              </TabsTrigger>
+              <TabsTrigger value="stock" className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Gestión Stock
+              </TabsTrigger>
+              <TabsTrigger value="alertas" className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Alertas
+              </TabsTrigger>
+              <TabsTrigger value="historial" className="flex items-center gap-2">
+                <History className="h-4 w-4" />
+                Historial
+              </TabsTrigger>
+            </TabsList>
 
-            <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value)}>
-              <SelectTrigger className="w-52 border-2 border-gray-200 focus:border-purple-500">
-                <SelectValue placeholder="Categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Tab: Productos */}
+            <TabsContent value="productos" className="space-y-6">
+              {/* Filtros */}
+              <div className="flex flex-col md:flex-row gap-4 mb-8 animate-slide-up" style={{ animationDelay: "400ms" }}>
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                      placeholder="Buscar productos por nombre..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 h-12 border-2 border-gray-200 focus:border-purple-500 transition-colors"
+                  />
+                </div>
 
-            <div className="w-56 flex items-center">
-              <span className="mr-2 text-sm text-gray-600">Precio máx:</span>
-              <Slider
-                  defaultValue={[maxPrice]}
-                  max={maxPrice}
-                  step={10}
-                  value={priceRange}
-                  onValueChange={setPriceRange}
-                  className="w-full"
-              />
-              <span className="ml-2 text-sm font-semibold text-gray-800">${priceRange[0]}</span>
-            </div>
+                <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value)}>
+                  <SelectTrigger className="w-52 border-2 border-gray-200 focus:border-purple-500">
+                    <SelectValue placeholder="Categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-            {canCreateProducts && (
-                <Button onClick={() => openModal()} className="h-12 px-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
-                  <Plus className="mr-2 h-4 w-4" /> Agregar
-                </Button>
-            )}
-          </div>
+                <div className="w-56 flex items-center">
+                  <span className="mr-2 text-sm text-gray-600">Precio máx:</span>
+                  <Slider
+                      defaultValue={[maxPrice]}
+                      max={maxPrice}
+                      step={10}
+                      value={priceRange}
+                      onValueChange={setPriceRange}
+                      className="w-full"
+                  />
+                  <span className="ml-2 text-sm font-semibold text-gray-800">${priceRange[0]}</span>
+                </div>
 
-          {/* Productos */}
-          {viewMode === "list" ? (
-              <ProductList
-                  products={currentProducts.map(mapProductoToRawProduct)}
-                  onEdit={canEditProducts ? handleEditModal : undefined}
-                  onDelete={canDeleteProducts ? handleDeleteRequest : undefined}
-              />
-          ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {currentProducts.map((product, index) => (
-                    <ProductCard
-                        key={product.id}
-                        product={mapProductoToProduct(product)}
-                        onEdit={canEditProducts ? () => openModal(product) : undefined}
-                        onDelete={canDeleteProducts ? () => handleDeleteRequest(product.id!) : undefined}
-                        delay={index * 100}
-                    />
-                ))}
+                <div className="flex gap-2">
+                  {canCreateProducts && (
+                      <Button onClick={() => openModal()} className="h-12 px-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg">
+                        <Plus className="mr-2 h-4 w-4" /> Agregar
+                      </Button>
+                  )}
+                  {canManageStock && (
+                      <Button onClick={() => openStockModal()} variant="outline" className="h-12 px-6 border-2 border-green-500 text-green-600 hover:bg-green-50">
+                        <Zap className="mr-2 h-4 w-4" /> Mover Stock
+                      </Button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                      variant={viewMode === "list" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setViewMode("list")}
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                  <Button
+                      variant={viewMode === "grid" ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setViewMode("grid")}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-          )}
-          {/* Paginación simple */}
-          {totalPages > 1 && (
-              <div className="flex justify-center items-center space-x-3 mt-6">
-                <Button
-                    disabled={currentPage === 1}
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    variant="outline"
-                >
-                  Anterior
-                </Button>
-                {[...Array(totalPages)].map((_, i) => (
+
+              {/* Lista de Productos */}
+              {viewMode === "list" ? (
+                  <ProductList
+                      products={currentProducts.map(mapProductoToRawProduct)}
+                      onEdit={canEditProducts ? handleEditModal : undefined}
+                      onDelete={canDeleteProducts ? handleDeleteRequest : undefined}
+                  />
+              ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {currentProducts.map((product, index) => (
+                        <ProductCard
+                            key={product.id}
+                            product={mapProductoToProduct(product)}
+                            onEdit={canEditProducts ? () => openModal(product) : undefined}
+                            onDelete={canDeleteProducts ? () => handleDeleteRequest(product.id!) : undefined}
+                            delay={index * 100}
+                        />
+                    ))}
+                  </div>
+              )}
+
+              {/* Paginación */}
+              {totalPages > 1 && (
+                  <div className="flex justify-center items-center space-x-3 mt-6">
                     <Button
-                        key={i}
-                        onClick={() => handlePageChange(i + 1)}
-                        variant={currentPage === i + 1 ? "default" : "outline"}
+                        disabled={currentPage === 1}
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        variant="outline"
                     >
-                      {i + 1}
+                      Anterior
                     </Button>
-                ))}
-                <Button
-                    disabled={currentPage === totalPages}
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    variant="outline"
-                >
-                  Siguiente
-                </Button>
+                    {[...Array(totalPages)].map((_, i) => (
+                        <Button
+                            key={i}
+                            onClick={() => handlePageChange(i + 1)}
+                            variant={currentPage === i + 1 ? "default" : "outline"}
+                        >
+                          {i + 1}
+                        </Button>
+                    ))}
+                    <Button
+                        disabled={currentPage === totalPages}
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        variant="outline"
+                    >
+                      Siguiente
+                    </Button>
+                  </div>
+              )}
+
+              {filteredProducts.length === 0 && (
+                  <EmptyState
+                      type={searchTerm ? "no-search-results" : "no-products"}
+                      onAddProduct={searchTerm || !canCreateProducts ? undefined : () => openModal()}
+                      isAuthenticated={isAuthenticated}
+                  />
+              )}
+            </TabsContent>
+
+            {/* Tab: Gestión de Stock */}
+            <TabsContent value="stock" className="space-y-6">
+              {canManageStock ? (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold">Gestión de Stock</h3>
+                      <p className="text-gray-600">Registra entradas, salidas y ajustes de inventario</p>
+                    </div>
+                    <Button onClick={() => openStockModal()} className="bg-green-600 hover:bg-green-700">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Nuevo Movimiento
+                    </Button>
+                  </div>
+                  <StockHistory />
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Zap className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Acceso Restringido</h3>
+                  <p className="text-gray-600">
+                    Necesitas permisos de administrador o empleado para gestionar el stock.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+
+            {/* Tab: Alertas de Stock */}
+            <TabsContent value="alertas" className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Alertas de Stock</h3>
+                <StockAlerts onManageStock={canManageStock ? openStockModal : undefined} />
               </div>
-          )}
+            </TabsContent>
+
+            {/* Tab: Historial */}
+            <TabsContent value="historial" className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Historial de Movimientos</h3>
+                <StockHistory />
+              </div>
+            </TabsContent>
+          </Tabs>
 
           {/* Confirmar eliminar producto */}
           <AlertDialog open={productToDelete !== null} onOpenChange={() => setProductToDelete(null)}>
@@ -302,13 +430,6 @@ export default function InventoryDashboard() {
             </AlertDialogContent>
           </AlertDialog>
 
-          {filteredProducts.length === 0 && (
-              <EmptyState
-                  type={searchTerm ? "no-search-results" : "no-products"}
-                  onAddProduct={searchTerm || !canCreateProducts ? undefined : () => openModal()}
-                  isAuthenticated={isAuthenticated}
-              />
-          )}
           <Toaster richColors position="top-right" />
 
         </main>
@@ -319,6 +440,13 @@ export default function InventoryDashboard() {
             product={selectedProduct ? mapProductoToProduct(selectedProduct) : null}
             onRefresh={fetchProducts}
             onSuccess={() => toast.success("Producto agregado correctamente")}
+        />
+
+        <StockMovementModal
+            isOpen={isStockModalOpen}
+            onClose={closeStockModal}
+            selectedProductId={selectedProductForStock}
+            onSuccess={handleStockSuccess}
         />
       </div>
   )

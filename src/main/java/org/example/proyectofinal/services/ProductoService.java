@@ -14,6 +14,24 @@ import java.util.List;
 public class ProductoService {
     private final ProductoRepository productoRepository;
 
+    public void actualizarStock(Long productId, int cantidad, String tipoMovimiento, String usuario) {
+        Producto producto = productoRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + productId));
+
+        if (tipoMovimiento.equalsIgnoreCase("ENTRADA")) {
+            producto.setCantidadInicial(producto.getCantidadInicial() + cantidad);
+        } else if (tipoMovimiento.equalsIgnoreCase("SALIDA")) {
+            if (producto.getCantidadInicial() < cantidad) {
+                throw new RuntimeException("No hay suficiente stock para realizar la salida");
+            }
+            producto.setCantidadInicial(producto.getCantidadInicial() - cantidad);
+        } else {
+            throw new IllegalArgumentException("Tipo de movimiento no válido: " + tipoMovimiento);
+        }
+
+        productoRepository.save(producto);
+    }
+
     public Producto crearProducto(Producto producto) {
         if (productoRepository.existsByNombre(producto.getNombre())) {
             throw new IllegalArgumentException("Ya existe un producto con el nombre: " + producto.getNombre());

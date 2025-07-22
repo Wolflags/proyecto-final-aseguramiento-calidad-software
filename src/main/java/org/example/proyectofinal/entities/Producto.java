@@ -23,5 +23,6 @@ public class Producto {
     public String categoria;
     public double precio;
     public int cantidadInicial;
+    public int stockMinimo;
 
 }

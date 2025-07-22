@@ -3,6 +3,7 @@ package org.example.proyectofinal.controller;
     import lombok.RequiredArgsConstructor;
     import org.example.proyectofinal.entities.Producto;
     import org.example.proyectofinal.services.ProductoService;
+    import org.example.proyectofinal.services.StockServices;
     import org.springframework.http.HttpStatus;
     import org.springframework.http.ResponseEntity;
     import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +18,18 @@ package org.example.proyectofinal.controller;
     public class ProductoController {
 
         private final ProductoService productoService;
+        private final StockServices stockServices;
+
+        @PostMapping("/{id}/actualizar-stock")
+        @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('EMPLEADO')")
+        public ResponseEntity<String> actualizarStock(
+                @PathVariable Long id,
+                @RequestParam int cantidad,
+                @RequestParam String tipoMovimiento,
+                @RequestParam String usuario){
+            productoService.actualizarStock(id, cantidad, tipoMovimiento, usuario);
+            return ResponseEntity.ok("Stock actualizado correctamente");
+        }
 
         @PostMapping
         @PreAuthorize("hasAuthority('ADMIN')")
@@ -50,10 +63,34 @@ package org.example.proyectofinal.controller;
             return ResponseEntity.ok(productoService.obtenerProductoPorId(id));
         }
 
+
         @PutMapping("/{id}")
         @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('EMPLEADO')")
-        public ResponseEntity<Producto> actualizarProducto(@PathVariable Long id, @RequestBody Producto productoActualizado) {
-            return ResponseEntity.ok(productoService.actualizarProducto(id, productoActualizado));
+        public ResponseEntity<Producto> actualizarProducto(
+                @PathVariable Long id,
+                @RequestBody Producto productoActualizado,
+                @RequestParam String usuario) {
+            Producto productoExistente = productoService.obtenerProductoPorId(id);
+            int cantidadAnterior = productoExistente.getCantidadInicial();
+            int cantidadNueva = productoActualizado.getCantidadInicial();
+
+            String tipomovimiento;
+            if(cantidadNueva < cantidadAnterior){
+                tipomovimiento = "SALIDA";
+            }else if(cantidadNueva > cantidadAnterior){
+                tipomovimiento = "ENTRADA";
+            }else{
+                tipomovimiento = "Ninguno";
+            }
+            Producto actualizado = productoService.actualizarProducto(id, productoActualizado);
+            stockServices.registrarMovimientoStock(
+                    actualizado.getId(),
+                    Math.abs(cantidadNueva - cantidadAnterior),
+                    tipomovimiento,
+                    usuario,
+                    String.valueOf(actualizado.getCantidadInicial())
+            );
+            return ResponseEntity.ok(actualizado);
         }
 
         @DeleteMapping("/{id}")
@@ -71,4 +108,6 @@ package org.example.proyectofinal.controller;
         public ResponseEntity<List<Producto>> buscarProductosPorCategoria(@RequestParam String categoria) {
             return ResponseEntity.ok(productoService.buscarProductosPorCategoria(categoria));
         }
+
+
     }

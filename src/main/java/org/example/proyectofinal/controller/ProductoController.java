@@ -19,7 +19,7 @@ package org.example.proyectofinal.controller;
         private final ProductoService productoService;
 
         @PostMapping
-        @PreAuthorize("hasAuthority('ADMIN')")
+        @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('EMPLEADO')")
         public ResponseEntity<?> crearProducto(@RequestBody Producto producto) {
             if (producto.getNombre() == null || producto.getNombre().isEmpty()) {
                 return ResponseEntity.badRequest().body("El nombre es obligatorio");

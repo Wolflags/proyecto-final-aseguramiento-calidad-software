@@ -45,9 +45,9 @@ export function StockHistory({ productoId }: StockHistoryProps) {
       const [productosResponse] = await Promise.all([
         listarProductos()
       ])
-      
+
       setProductos(productosResponse.data)
-      
+
       if (productoId) {
         await fetchHistorialPorProducto(productoId)
       } else {
@@ -136,224 +136,224 @@ export function StockHistory({ productoId }: StockHistoryProps) {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <History className="h-5 w-5" />
-            Historial de Movimientos
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="animate-pulse">
-                <div className="h-16 bg-gray-200 rounded"></div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Historial de Movimientos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="h-16 bg-gray-200 rounded"></div>
+                  </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Filtros */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filtros
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="text-sm font-medium mb-1 block">Producto</label>
-              <Select
-                value={filtros.productoId.toString()}
-                onValueChange={(value) => setFiltros(prev => ({ ...prev, productoId: parseInt(value) || 0 }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos los productos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">Todos los productos</SelectItem>
-                  {productos.map((producto) => (
-                    <SelectItem key={producto.id} value={producto.id!.toString()}>
-                      {producto.nombre}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-1 block">Tipo de Movimiento</label>
-              <Select
-                value={filtros.tipoMovimiento}
-                onValueChange={(value) => setFiltros(prev => ({ ...prev, tipoMovimiento: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos los tipos" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Todos los tipos</SelectItem>
-                  <SelectItem value="ENTRADA">Entradas</SelectItem>
-                  <SelectItem value="SALIDA">Salidas</SelectItem>
-                  <SelectItem value="AJUSTE_INVENTARIO">Ajustes</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium mb-1 block">Usuario</label>
-              <Input
-                placeholder="Filtrar por usuario..."
-                value={filtros.usuario}
-                onChange={(e) => setFiltros(prev => ({ ...prev, usuario: e.target.value }))}
-              />
-            </div>
-
-            <div className="flex items-end">
-              <Button
-                variant="outline"
-                onClick={() => setFiltros({ productoId: 0, tipoMovimiento: '', usuario: '' })}
-                className="w-full"
-              >
-                Limpiar Filtros
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="space-y-6">
+        {/* Filtros */}
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <History className="h-8 w-8 text-blue-600" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5" />
+              Filtros
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
-                <p className="text-2xl font-bold text-blue-600">{estadisticas.total}</p>
-                <p className="text-sm text-gray-600">Total</p>
+                <label className="text-sm font-medium mb-1 block">Producto</label>
+                <Select
+                    value={filtros.productoId.toString()}
+                    onValueChange={(value) => setFiltros(prev => ({ ...prev, productoId: parseInt(value) || 0 }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos los productos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">Todos los productos</SelectItem>
+                    {productos.map((producto) => (
+                        <SelectItem key={producto.id} value={producto.id!.toString()}>
+                          {producto.nombre}
+                        </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Tipo de Movimiento</label>
+                <Select
+                    value={filtros.tipoMovimiento}
+                    onValueChange={(value) => setFiltros(prev => ({ ...prev, tipoMovimiento: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Todos los tipos" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todos los tipos</SelectItem>
+                    <SelectItem value="ENTRADA">Entradas</SelectItem>
+                    <SelectItem value="SALIDA">Salidas</SelectItem>
+                    <SelectItem value="AJUSTE_INVENTARIO">Ajustes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-1 block">Usuario</label>
+                <Input
+                    placeholder="Filtrar por usuario..."
+                    value={filtros.usuario}
+                    onChange={(e) => setFiltros(prev => ({ ...prev, usuario: e.target.value }))}
+                />
+              </div>
+
+              <div className="flex items-end">
+                <Button
+                    variant="outline"
+                    onClick={() => setFiltros({ productoId: 0, tipoMovimiento: '', usuario: '' })}
+                    className="w-full"
+                >
+                  Limpiar Filtros
+                </Button>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <TrendingUp className="h-8 w-8 text-green-600" />
-              <div>
-                <p className="text-2xl font-bold text-green-600">{estadisticas.entradas}</p>
-                <p className="text-sm text-gray-600">Entradas</p>
+        {/* Estadísticas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <History className="h-8 w-8 text-blue-600" />
+                <div>
+                  <p className="text-2xl font-bold text-blue-600">{estadisticas.total}</p>
+                  <p className="text-sm text-gray-600">Total</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <TrendingDown className="h-8 w-8 text-red-600" />
-              <div>
-                <p className="text-2xl font-bold text-red-600">{estadisticas.salidas}</p>
-                <p className="text-sm text-gray-600">Salidas</p>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <TrendingUp className="h-8 w-8 text-green-600" />
+                <div>
+                  <p className="text-2xl font-bold text-green-600">{estadisticas.entradas}</p>
+                  <p className="text-sm text-gray-600">Entradas</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <RotateCcw className="h-8 w-8 text-blue-600" />
-              <div>
-                <p className="text-2xl font-bold text-blue-600">{estadisticas.ajustes}</p>
-                <p className="text-sm text-gray-600">Ajustes</p>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <TrendingDown className="h-8 w-8 text-red-600" />
+                <div>
+                  <p className="text-2xl font-bold text-red-600">{estadisticas.salidas}</p>
+                  <p className="text-sm text-gray-600">Salidas</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
 
-      {/* Tabla de movimientos */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <History className="h-5 w-5" />
-            Historial de Movimientos ({movimientosFiltrados.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {movimientosFiltrados.length === 0 ? (
-            <div className="text-center py-8">
-              <History className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay movimientos</h3>
-              <p className="text-gray-600">
-                No se encontraron movimientos con los filtros aplicados.
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Fecha y Hora</TableHead>
-                    <TableHead>Producto</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Cantidad</TableHead>
-                    <TableHead>Usuario</TableHead>
-                    <TableHead>Observaciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {movimientosFiltrados.map((movimiento) => (
-                    <TableRow key={movimiento.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm">{formatDate(movimiento.fechaMovimiento)}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Package className="h-4 w-4 text-gray-500" />
-                          <span className="font-medium">{getProductoNombre(movimiento.productoId)}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getMovementBadgeColor(movimiento.tipoMovimiento)}>
-                          <div className="flex items-center gap-1">
-                            {getMovementIcon(movimiento.tipoMovimiento)}
-                            {getMovementText(movimiento.tipoMovimiento)}
-                          </div>
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <span className="font-bold text-lg">{movimiento.cantidad}</span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-gray-500" />
-                          <span>{movimiento.usuario}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <RotateCcw className="h-8 w-8 text-blue-600" />
+                <div>
+                  <p className="text-2xl font-bold text-blue-600">{estadisticas.ajustes}</p>
+                  <p className="text-sm text-gray-600">Ajustes</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Tabla de movimientos */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Historial de Movimientos ({movimientosFiltrados.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {movimientosFiltrados.length === 0 ? (
+                <div className="text-center py-8">
+                  <History className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay movimientos</h3>
+                  <p className="text-gray-600">
+                    No se encontraron movimientos con los filtros aplicados.
+                  </p>
+                </div>
+            ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Fecha y Hora</TableHead>
+                        <TableHead>Producto</TableHead>
+                        <TableHead>Tipo</TableHead>
+                        <TableHead>Cantidad</TableHead>
+                        <TableHead>Usuario</TableHead>
+                        <TableHead>Observaciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {movimientosFiltrados.map((movimiento) => (
+                          <TableRow key={movimiento.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-gray-500" />
+                                <span className="text-sm">{formatDate(movimiento.fechaMovimiento)}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Package className="h-4 w-4 text-gray-500" />
+                                <span className="font-medium">{getProductoNombre(movimiento.productoId)}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge className={getMovementBadgeColor(movimiento.tipoMovimiento)}>
+                                <div className="flex items-center gap-1">
+                                  {getMovementIcon(movimiento.tipoMovimiento)}
+                                  {getMovementText(movimiento.tipoMovimiento)}
+                                </div>
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <span className="font-bold text-lg">{movimiento.cantidad}</span>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-gray-500" />
+                                <span>{movimiento.usuario}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
                         <span className="text-sm text-gray-600">
                           {movimiento.observaciones || '-'}
                         </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                            </TableCell>
+                          </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
   )
 }

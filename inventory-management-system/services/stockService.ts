@@ -14,16 +14,16 @@ const authApi = axios.create({
 
 // Interceptor para agregar token
 authApi.interceptors.request.use(
-  async (config) => {
-    const session = await getSession()
-    if (session?.accessToken) {
-      config.headers.Authorization = `Bearer ${session.accessToken}`
+    async (config) => {
+      const session = await getSession()
+      if (session?.accessToken) {
+        config.headers.Authorization = `Bearer ${session.accessToken}`
+      }
+      return config
+    },
+    (error) => {
+      return Promise.reject(error)
     }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  }
 )
 
 // Tipos para Stock
@@ -67,31 +67,31 @@ export interface ProductoAlerta {
 
 // Servicios de Stock
 export const registrarMovimientoStock = (movimiento: MovimientoStockRequest) =>
-  authApi.post(`${STOCK_URL}/movimiento`, movimiento)
+    authApi.post(`${STOCK_URL}/movimiento`, movimiento)
 
 export const obtenerHistorialCompleto = () =>
-  authApi.get(`${STOCK_URL}/historial`)
+    authApi.get(`${STOCK_URL}/historial`)
 
 export const obtenerHistorialPorProducto = (productoId: number) =>
-  authApi.get(`${STOCK_URL}/historial/producto/${productoId}`)
+    authApi.get(`${STOCK_URL}/historial/producto/${productoId}`)
 
 export const obtenerHistorialPorUsuario = (usuario: string) =>
-  authApi.get(`${STOCK_URL}/historial/usuario/${usuario}`)
+    authApi.get(`${STOCK_URL}/historial/usuario/${usuario}`)
 
 export const obtenerMovimientosPorTipo = (tipo: 'ENTRADA' | 'SALIDA' | 'AJUSTE_INVENTARIO') =>
-  authApi.get(`${STOCK_URL}/historial/tipo/${tipo}`)
+    authApi.get(`${STOCK_URL}/historial/tipo/${tipo}`)
 
 export const obtenerMovimientosPorFecha = (fechaInicio: string, fechaFin: string) =>
-  authApi.get(`${STOCK_URL}/historial/fecha?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`)
+    authApi.get(`${STOCK_URL}/historial/fecha?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`)
 
 export const obtenerProductosStockMinimo = () =>
-  authApi.get(`${STOCK_URL}/alertas/stock-minimo`)
+    authApi.get(`${STOCK_URL}/alertas/stock-minimo`)
 
 export const obtenerProductosSinStock = () =>
-  authApi.get(`${STOCK_URL}/alertas/sin-stock`)
+    authApi.get(`${STOCK_URL}/alertas/sin-stock`)
 
 export const verificarStockMinimo = (productoId: number) =>
-  authApi.get(`${STOCK_URL}/verificar-stock-minimo/${productoId}`)
+    authApi.get(`${STOCK_URL}/verificar-stock-minimo/${productoId}`)
 
 export const obtenerEstadisticasStock = () =>
-  authApi.get(`${STOCK_URL}/estadisticas`)
+    authApi.get(`${STOCK_URL}/estadisticas`)

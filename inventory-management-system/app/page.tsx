@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { toast, Toaster } from "sonner"
 import {
-  Package, Plus, Search, AlertTriangle, DollarSign, BarChart3, LayoutGrid, List, 
+  Package, Plus, Search, AlertTriangle, DollarSign, BarChart3, LayoutGrid, List,
   History, TrendingUp, Zap
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -78,8 +78,8 @@ export default function InventoryDashboard() {
   const canDeleteProducts = isAuthenticated && hasRole('ADMIN')
   const canManageStock = isAuthenticated && hasAnyRole(['ADMIN', 'EMPLEADO'])
 
-    const fetchProducts = () => {
-      listarProductos()
+  const fetchProducts = () => {
+    listarProductos()
         .then((res) => {
           console.log("Fetched products:", res.data); // Debugging the data
           const sorted = [...res.data].sort((a, b) => Number(b.id) - Number(a.id)); // Ensure numeric sorting
@@ -90,7 +90,7 @@ export default function InventoryDashboard() {
           setPriceRange([highestPrice]);
         })
         .catch((error) => console.error("Error al cargar productos", error));
-    };
+  };
 
 
   useEffect(() => {
@@ -375,27 +375,27 @@ export default function InventoryDashboard() {
             {/* Tab: Gestión de Stock */}
             <TabsContent value="stock" className="space-y-6">
               {canManageStock ? (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold">Gestión de Stock</h3>
-                      <p className="text-gray-600">Registra entradas, salidas y ajustes de inventario</p>
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold">Gestión de Stock</h3>
+                        <p className="text-gray-600">Registra entradas, salidas y ajustes de inventario</p>
+                      </div>
+                      <Button onClick={() => openStockModal()} className="bg-green-600 hover:bg-green-700">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo Movimiento
+                      </Button>
                     </div>
-                    <Button onClick={() => openStockModal()} className="bg-green-600 hover:bg-green-700">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Nuevo Movimiento
-                    </Button>
+                    <StockHistory />
                   </div>
-                  <StockHistory />
-                </div>
               ) : (
-                <div className="text-center py-12">
-                  <Zap className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Acceso Restringido</h3>
-                  <p className="text-gray-600">
-                    Necesitas permisos de administrador o empleado para gestionar el stock.
-                  </p>
-                </div>
+                  <div className="text-center py-12">
+                    <Zap className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Acceso Restringido</h3>
+                    <p className="text-gray-600">
+                      Necesitas permisos de administrador o empleado para gestionar el stock.
+                    </p>
+                  </div>
               )}
             </TabsContent>
 

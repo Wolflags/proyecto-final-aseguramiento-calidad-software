@@ -24,8 +24,8 @@ setup('authenticate', async ({ page, context }) => {
   await page.waitForSelector('#username', { state: 'visible', timeout: 15000 });
   
   // Llenar credenciales
-  await page.fill('#username', 'admin1');
-  await page.fill('#password', 'admin1');
+  await page.fill('#username', 'admin');
+  await page.fill('#password', 'admin');
   
   // Buscar el botón de login en Keycloak y hacer clic
   const keycloakSubmitButton = page.locator('button#kc-login, input[type="submit"]').first();

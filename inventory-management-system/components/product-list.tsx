@@ -185,7 +185,7 @@ export function ProductList({ products: rawProducts, onEdit, onDelete, renderExt
                         <div className="flex flex-col gap-2 items-center">
                           <div className="flex gap-2">
                             {onEdit && (
-                                <Button variant="outline" size="sm" onClick={() => onEdit(product)}>
+                                <Button id="editButton" variant="outline" size="sm" onClick={() => onEdit(product)}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
                             )}

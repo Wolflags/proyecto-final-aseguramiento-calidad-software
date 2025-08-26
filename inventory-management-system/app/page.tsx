@@ -244,7 +244,7 @@ export default function InventoryDashboard() {
                     </div>
 
                     {canCreateProducts && (
-                        <Button onClick={() => openModal()} className="h-12 px-6 bg-gradient-to-r from-purple-600 to-blue-600">
+                        <Button id="addButton" onClick={() => openModal()} className="h-12 px-6 bg-gradient-to-r from-purple-600 to-blue-600">
                             <Plus className="mr-2 h-4 w-4" /> Agregar
                         </Button>
                     )}

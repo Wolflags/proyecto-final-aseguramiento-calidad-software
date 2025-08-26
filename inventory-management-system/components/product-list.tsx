@@ -5,6 +5,8 @@ import { Edit, Trash2, ChevronDown, ChevronUp, ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CategoryIconSelector } from "@/components/category-icon-selector"
+import { ProductHistorialModal } from "@/components/product-historial-modal"
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 interface RawProduct {
@@ -29,12 +31,13 @@ interface ProductListProps {
   products: RawProduct[]
   onEdit?: (product: Product) => void
   onDelete?: (productId: number) => void
+  renderExtraActions?: (product: Product) => React.ReactNode   // 👈 nuevo
 }
 
 type SortField = "name" | "category" | "price" | "quantity"
 type SortDirection = "asc" | "desc"
 
-export function ProductList({ products: rawProducts, onEdit, onDelete }: ProductListProps) {
+export function ProductList({ products: rawProducts, onEdit, onDelete, renderExtraActions }: ProductListProps) {
   const [products, setProducts] = useState<Product[]>([])
   const [sortField, setSortField] = useState<SortField>("name")
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
@@ -92,6 +95,14 @@ export function ProductList({ products: rawProducts, onEdit, onDelete }: Product
         ? <ChevronUp className="h-4 w-4 text-purple-600" />
         : <ChevronDown className="h-4 w-4 text-purple-600" />
   }
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
+  const [isHistorialOpen, setIsHistorialOpen] = useState(false)
+
+  const openHistorial = (id: number) => {
+    setSelectedProductId(id)
+    setIsHistorialOpen(true)
+  }
+
 
   if (products.length === 0) return null
 
@@ -171,20 +182,28 @@ export function ProductList({ products: rawProducts, onEdit, onDelete }: Product
                         <span className="font-semibold text-green-600">${total.toLocaleString()}</span>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center justify-center gap-2">
-                          {onEdit && (
-                            <Button id="editButton" variant="outline" size="sm" onClick={() => onEdit(product)} className="hover:bg-blue-50 hover:border-blue-300 transition-colors bg-transparent group">
-                              <Edit className="h-4 w-4 group-hover:text-blue-600 transition-colors" />
-                            </Button>
-                          )}
-                          {onDelete && (
-                            <Button variant="outline" size="sm" onClick={() => onDelete(product.id)} className="hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors bg-transparent group">
-                              <Trash2 className="h-4 w-4 group-hover:text-red-600 transition-colors" />
-                            </Button>
-                          )}
-                          {!onEdit && !onDelete && (
-                            <span className="text-sm text-gray-400">Sin permisos</span>
-                          )}
+                        <div className="flex flex-col gap-2 items-center">
+                          <div className="flex gap-2">
+                            {onEdit && (
+                                <Button variant="outline" size="sm" onClick={() => onEdit(product)}>
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                            )}
+                            {onDelete && (
+                                <Button variant="outline" size="sm" onClick={() => onDelete(product.id)}>
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                            )}
+                          </div>
+                          <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openHistorial(product.id)}
+                              className="hover:bg-purple-50 hover:border-purple-300 transition-colors bg-transparent group"
+                          >
+                            Historial
+                          </Button>
+
                         </div>
                       </TableCell>
                     </TableRow>
@@ -212,6 +231,13 @@ export function ProductList({ products: rawProducts, onEdit, onDelete }: Product
             </div>
           </div>
         </div>
+
+        {/* Modal del historial - fuera del bucle */}
+        <ProductHistorialModal
+            isOpen={isHistorialOpen}
+            onClose={() => setIsHistorialOpen(false)}
+            productId={selectedProductId}
+        />
       </div>
   )
 }

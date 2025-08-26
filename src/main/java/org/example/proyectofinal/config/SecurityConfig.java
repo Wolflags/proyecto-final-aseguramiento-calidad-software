@@ -71,7 +71,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow OPTIONS requests for CORS
                 // Endpoints con roles
-                .requestMatchers(HttpMethod.POST, "/api/productos").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/productos").hasAnyAuthority("ADMIN", "EMPLEADO")
                 .requestMatchers(HttpMethod.PUT, "/api/productos/**").hasAnyAuthority("ADMIN", "EMPLEADO")
                 .requestMatchers(HttpMethod.DELETE, "/api/productos/**").hasAuthority("ADMIN")
 

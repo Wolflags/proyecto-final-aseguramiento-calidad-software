@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -50,10 +51,25 @@ public class ApiIntegrationController {
         return ResponseEntity.ok(productoService.obtenerProductoPorId(id));
     }
 
+//    @PutMapping("/{id}")
+//    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('EMPLEADO')")
+//    public ResponseEntity<Producto> actualizarProducto(@PathVariable Long id, @RequestBody Producto productoActualizado) {
+//        //return ResponseEntity.ok(productoService.actualizarProducto(id, productoActualizado));
+//        return ResponseEntity.ok(productoService.actualizarProducto(id, productoActualizado));
+//    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('EMPLEADO')")
-    public ResponseEntity<Producto> actualizarProducto(@PathVariable Long id, @RequestBody Producto productoActualizado) {
-        return ResponseEntity.ok(productoService.actualizarProducto(id, productoActualizado));
+    public ResponseEntity<Producto> actualizarCantidadProducto(
+            @PathVariable Long id,
+            @RequestParam int nuevaCantidad,
+            @RequestParam String tipo,    // "ENTRADA" o "SALIDA"
+            @RequestParam String motivo,
+            Principal principal
+    ) {
+        String usuario = principal.getName(); // obtiene el username del token
+        Producto actualizado = productoService.actualizarCantidad(id, nuevaCantidad, tipo, motivo, usuario);
+        return ResponseEntity.ok(actualizado);
     }
 
     @DeleteMapping("/{id}")

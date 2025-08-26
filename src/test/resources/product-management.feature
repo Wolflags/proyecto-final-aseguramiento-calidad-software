@@ -4,7 +4,7 @@ Feature: Product Management
           So that I can maintain the inventory
 
           Background:
-            Given I have valid admin credentials "admin1" and "admin1"
+            Given I have valid admin credentials "admin" and "admin"
 
           Scenario: Successfully create a complete product
             When I create a product with name "Test Product", description "A test product for testing", category "Electronics", price 100.0, and quantity 50
@@ -36,7 +36,7 @@ Feature: Product Management
             Given I have created a complete product with name "Product to Delete", description "Will be deleted", category "Temporary", price 25.0, and quantity 10
             When I delete the product
             Then the product should be deleted successfully
-            And the response status should be 204
+            And the response status should be 200
 
           Scenario: Search products by name
             Given I have created a complete product with name "Laptop Gaming", description "High-end gaming laptop", category "Electronics", price 1500.0, and quantity 5
@@ -57,14 +57,14 @@ Feature: Product Management
             And the response status should be 401
 
           Scenario: Fail to delete product as non-admin user
-            Given I have valid employee credentials "empleado1" and "empleado1"
+            Given I have valid employee credentials "empleado" and "empleado"
             And I have created a complete product as admin with name "Protected Product", description "Protected", category "Secure", price 100.0, and quantity 15
             When I attempt to delete the product as employee
             Then the deletion should fail with forbidden error
             And the response status should be 403
 
           Scenario: Successfully update product as employee
-            Given I have valid employee credentials "empleado1" and "empleado1"
+            Given I have valid employee credentials "empleado" and "empleado"
             And I have created a complete product as admin with name "Employee Update Product", description "Employee test", category "Office", price 100.0, and quantity 20
             When I update the product as employee with name "Employee Updated", description "Updated by employee", category "Office Supplies", price 120.0, and quantity 25
             Then the product should be updated successfully

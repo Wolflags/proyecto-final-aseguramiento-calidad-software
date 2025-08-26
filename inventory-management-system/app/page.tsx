@@ -300,14 +300,14 @@ export default function InventoryDashboard() {
                 )}
 
                 <AlertDialog open={productToDelete !== null} onOpenChange={() => setProductToDelete(null)}>
-                    <AlertDialogContent>
+                    <AlertDialogContent data-testid="delete-confirmation-dialog">
                         <AlertDialogHeader>
                             <AlertDialogTitle>¿Eliminar producto?</AlertDialogTitle>
                             <AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={confirmDeleteProduct}>Eliminar</AlertDialogAction>
+                            <AlertDialogAction id="confirmDeleteButton" onClick={confirmDeleteProduct}>Eliminar</AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>

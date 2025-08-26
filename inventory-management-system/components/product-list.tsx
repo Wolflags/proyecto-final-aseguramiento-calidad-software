@@ -190,7 +190,7 @@ export function ProductList({ products: rawProducts, onEdit, onDelete, renderExt
                                 </Button>
                             )}
                             {onDelete && (
-                                <Button variant="outline" size="sm" onClick={() => onDelete(product.id)}>
+                                <Button id="deleteButton" variant="outline" size="sm" onClick={() => onDelete(product.id)}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                             )}

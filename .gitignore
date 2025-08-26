@@ -37,3 +37,6 @@ out/
 .vscode/
 /inventory-management-system/auth.json
 /inventory-management-system/tests/auth.json
+
+### Database Data ###
+postgres_data/

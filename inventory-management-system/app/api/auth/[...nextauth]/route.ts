@@ -1,8 +1,8 @@
 import NextAuth from "next-auth"
 import { NextAuthOptions } from "next-auth"
 
-const clientId = "inventario-frontend"
-const issuer = "http://localhost:9090/realms/InventarioRealm"
+const clientId = process.env.KEYCLOAK_CLIENT_ID || "inventario-frontend"
+const issuer = process.env.KEYCLOAK_ISSUER || "http://localhost:9090/realms/InventarioRealm"
 
 interface KeycloakProfile {
   sub: string
@@ -29,6 +29,7 @@ async function validateToken(token: string): Promise<boolean> {
 }
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     {
       id: "keycloak-pkce",
